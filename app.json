@@ -5,7 +5,7 @@
         "flask",
         "postgresql"
     ],
-    "repository": "https://github.com/tko22/flask-boilerplate",
+    "repository": "https://github.com/gperfar/flask-boilerplate",
     "success_url": "/",
     "scripts": {
         "postdeploy": "make heroku_setup"

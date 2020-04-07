@@ -12,9 +12,19 @@ def index():
     # you are now in the current application context with the main.route decorator
     # access the logger with the logger from api.core and uses the standard logging module
     # try using ipdb here :) you can inject yourself
-    logger.info("Hello Jules!")
-    return "<h1>Hello Jules!</h1>"
+    logger.info("Hello, Ring Bearer")
+    return "<h1>Hello, Ring Bearer</h1>"
 
+# function that is called when you visit /persons
+@main.route("/init", methods=["GET"])
+def init_data():
+
+    person1 = Person(name="Aragorn")
+    person2 = Person(name="Gandalf")
+    db.session.add(person1)
+    db.session.add(person2)
+    db.session.commit()
+    return "Data has been initialized :D"
 
 @main.app_errorhandler(404)
 def page_not_found(e):
@@ -30,11 +40,12 @@ def get_connections():
 # function that is called when you visit /persons
 @main.route("/persons", methods=["GET"])
 def get_persons():
-    # add a Person with name "Tim" and another with name "Tim2"– yes, I'm that narcissistic haha
-    #person1 = Person(name="Tim")
-    #person2 = Person(name="Tim2")
+
+    #person1 = Person(name="Aragorn")
+    #person2 = Person(name="Gandalf")
     #db.session.add(person1)
     #db.session.add(person2)
+    #db.session.commit()
     #retrieve persons
     persons = Person.query.all()
     return create_response(data={"persons": serialize_list(persons)})
