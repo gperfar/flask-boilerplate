@@ -1,5 +1,5 @@
 from flask import Blueprint, request
-from api.models import db, Person, Email
+from api.models import db, Person, Email, Connection
 from api.core import create_response, serialize_list, logger
 from sqlalchemy import inspect
 
@@ -15,13 +15,24 @@ def index():
     logger.info("Hello Chalo!")
     return "<h1>Hello Chalo!</h1>"
 
+# function that is called when you visit /connections
+@main.route("/connections", methods=["GET"])
+def get_connections():
+    connections = Connection.query.all()
+    return create_response(data={"connections": serialize_list(connections)})
+
 
 # function that is called when you visit /persons
 @main.route("/persons", methods=["GET"])
 def get_persons():
+    # add a Person with name "Tim" and another with name "Tim2"– yes, I'm that narcissistic haha
+    #person1 = Person(name="Tim")
+    #person2 = Person(name="Tim2")
+    #db.session.add(person1)
+    #db.session.add(person2)
+    #retrieve persons
     persons = Person.query.all()
     return create_response(data={"persons": serialize_list(persons)})
-
 
 # POST request for /persons
 @main.route("/persons", methods=["POST"])
