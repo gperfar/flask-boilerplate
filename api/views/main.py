@@ -15,6 +15,11 @@ def index():
     logger.info("Hello Jules!")
     return "<h1>Hello Jules!</h1>"
 
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return "<h1>404: Not found</h1><p>\" I have no memory of this place\".</p><p>Gandalf the Grey</p>", 404
+
 # function that is called when you visit /connections
 @main.route("/connections", methods=["GET"])
 def get_connections():
