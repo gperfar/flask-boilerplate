@@ -18,7 +18,7 @@ def index():
 
 @main.app_errorhandler(404)
 def page_not_found(e):
-    return "<h1>404: Not found</h1><p>\" I have no memory of this place\".</p><p>Gandalf the Grey</p>", 404
+    return "<h1>404: Not found</h1><p>\" I have no memory of this place\".</p><p>Gandalf the Grey</p> <img src=\"https://media1.tenor.com/images/034e7f9bd0df198f758dad87858b0004/tenor.gif?itemid=9228837\">", 404
 
 # function that is called when you visit /connections
 @main.route("/connections", methods=["GET"])
