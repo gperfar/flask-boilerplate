@@ -12,8 +12,8 @@ def index():
     # you are now in the current application context with the main.route decorator
     # access the logger with the logger from api.core and uses the standard logging module
     # try using ipdb here :) you can inject yourself
-    logger.info("Hello World!")
-    return "<h1>Hello World!</h1>"
+    logger.info("Hello Chalo!")
+    return "<h1>Hello Chalo!</h1>"
 
 
 # function that is called when you visit /persons
