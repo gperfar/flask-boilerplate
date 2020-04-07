@@ -16,7 +16,7 @@ def index():
     return "<h1>Hello Jules!</h1>"
 
 
-@main.errorhandler(404)
+@main.app_errorhandler(404)
 def page_not_found(e):
     return "<h1>404: Not found</h1><p>\" I have no memory of this place\".</p><p>Gandalf the Grey</p>", 404
 
