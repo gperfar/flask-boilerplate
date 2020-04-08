@@ -1,5 +1,5 @@
 from flask import Blueprint, request
-from api.models import db, Person, Email, Connection
+from api.models import db, User, Sentence, Connection
 from api.core import create_response, serialize_list, logger
 from sqlalchemy import inspect
 
@@ -18,12 +18,12 @@ def index():
 # function that is called when you visit /persons
 @main.route("/init", methods=["GET"])
 def init_data():
-    persons =[]
-    person1 = Person(name="Aragorn")
-    person2 = Person(name="Gandalf")
-    persons.append(person1)
-    persons.append(person2)
-    db.session.add_all(persons)
+    dummyusers =[]
+    user1 = User(name="Aragorn", email="AragornStrider@gondor.com", password="KingOfGondor123")
+    user2 = User(name="Gandalf", email="WhiteWizard@gondor.com", password="FlyYouFools!")
+    dummyusers.append(user1)
+    dummyusers.append(user2)
+    db.session.add_all(dummyusers)
     # db.session.add(person1)
     # db.session.add(person2)
     db.session.commit()
@@ -40,21 +40,15 @@ def get_connections():
     return create_response(data={"connections": serialize_list(connections)})
 
 
-# function that is called when you visit /persons
-@main.route("/persons", methods=["GET"])
-def get_persons():
+# function that is called when you visit /users
+@main.route("/users", methods=["GET"])
+def get_users():
 
-    #person1 = Person(name="Aragorn")
-    #person2 = Person(name="Gandalf")
-    #db.session.add(person1)
-    #db.session.add(person2)
-    #db.session.commit()
-    #retrieve persons
-    persons = Person.query.all()
-    return create_response(data={"persons": serialize_list(persons)})
+    users = User.query.all()
+    return create_response(data={"users": serialize_list(users)})
 
-# POST request for /persons
-@main.route("/persons", methods=["POST"])
+# POST request for /users
+@main.route("/users", methods=["POST"])
 def create_person():
     data = request.get_json()
 
@@ -69,13 +63,12 @@ def create_person():
         return create_response(status=422, message=msg)
 
     # create SQLAlchemy Objects
-    new_person = Person(name=data["name"])
-    email = Email(email=data["email"])
+    new_user = User(name=data["name"])
     new_person.emails.append(email)
 
     # commit it to database
-    db.session.add_all([new_person, email])
+    db.session.add_all([new_user, email])
     db.session.commit()
     return create_response(
-        message=f"Successfully created person {new_person.name} with id: {new_person._id}"
+        message=f"Successfully created person {new_user.name} with id: {new_user._id}"
     )
