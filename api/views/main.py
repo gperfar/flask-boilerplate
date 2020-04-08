@@ -40,7 +40,7 @@ def init_data():
     sentence1 = Sentence(sentence="SELECT * FROM people WHERE kingdom = 'Rohan'", connection = 1, comment = "Keeping tabs on the Rohirrim")
     db.session.add(sentence1)
     db.session.commit()
-    
+
     return "Data has been initialized :D"
 
 @main.app_errorhandler(404)
@@ -99,14 +99,13 @@ def create_person():
         return create_response(status=422, message=msg)
 
     # create SQLAlchemy Objects
-    new_user = User(name=data["name"])
-    new_person.emails.append(email)
+    new_user = User(name=data["name"], email = data["email"], password = data["password"])
 
     # commit it to database
-    db.session.add_all([new_user, email])
+    db.session.add(new_user)
     db.session.commit()
     return create_response(
-        message=f"Successfully created person {new_user.name} with id: {new_user._id}"
+        message=f"Successfully created person {new_user.name} with id: {new_user.id}"
     )
 
 # function that is called when you visit /sentences
