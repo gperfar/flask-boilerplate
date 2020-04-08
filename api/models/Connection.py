@@ -14,7 +14,7 @@ class Connection(Mixin, db.Model):
     comment = db.Column(db.String, nullable=True)
     user = db.Column(db.Integer, db.ForeignKey("user.id", ondelete="CASCADE"), nullable=True)
 
-    def __init__(self, name: str, host:str, database:str, username:str, password:str, comment:str, user:id):
+    def __init__(self, name: str, host:str, database:str, username:str, password:str, comment:str, user:int):
         self.name = name
         self.host = host
         self.database = database

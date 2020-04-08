@@ -18,15 +18,29 @@ def index():
 # function that is called when you visit /persons
 @main.route("/init", methods=["GET"])
 def init_data():
+    #Users
     dummyusers =[]
     user1 = User(name="Aragorn", email="AragornStrider@gondor.com", password="KingOfGondor123")
     user2 = User(name="Gandalf", email="WhiteWizard@gondor.com", password="FlyYouFools!")
     dummyusers.append(user1)
     dummyusers.append(user2)
     db.session.add_all(dummyusers)
-    # db.session.add(person1)
-    # db.session.add(person2)
     db.session.commit()
+    #Connections
+    dummyconnections =[]
+    connection1 = Connection(
+        name="Aragorn's Connection 1", host="AragornStrider.gondor.com", database="Gondor", username = "userr", password = "password", comment = "",user = 1)
+    connection2 = Connection(
+        name="Aragorn's Connection 2", host="AragornStrider2.gondor.com", database="Gondor2", username = "userr2", password = "password2",comment = "", user = 1)
+    dummyconnections.append(connection1)
+    dummyconnections.append(connection2)
+    db.session.add_all(dummyconnections)
+    db.session.commit()
+    #Sentences
+    sentence1 = Sentence(sentence="SELECT * FROM people WHERE kingdom = 'Rohan'", connection = 1, comment = "Keeping tabs on the Rohirrim")
+    db.session.add(sentence1)
+    db.session.commit()
+    
     return "Data has been initialized :D"
 
 @main.app_errorhandler(404)
@@ -39,11 +53,33 @@ def get_connections():
     connections = Connection.query.all()
     return create_response(data={"connections": serialize_list(connections)})
 
+# POST request for /connections
+@main.route("/connections", methods=["POST"])
+def create_connection():
+    data = request.get_json()
+    # logger.info("Data recieved: %s", data)
+    # if "name" not in data:
+    #     msg = "No name provided for connection."
+    #     logger.info(msg)
+    #     return create_response(status=422, message=msg)
+    # if "host" not in data:
+    #     msg = "No host provided for connection."
+    #     logger.info(msg)
+    #     return create_response(status=422, message=msg)
+    #AGREGAR EL RESTO DE LOS FIELDS (REQUIRED)
+
+    # create SQLAlchemy Object
+    new_connection = Connection(name=data["name"], host = data["host"], database = data["database"], username = data["username"], password = data["password"], user = data["user"], comment = data["comment"])
+    # commit it to database
+    db.session.add(new_connection)
+    db.session.commit()
+    return create_response(
+        message=f"Successfully created connection {new_connection.name} with id: {new_connection.id}"
+    )
 
 # function that is called when you visit /users
 @main.route("/users", methods=["GET"])
 def get_users():
-
     users = User.query.all()
     return create_response(data={"users": serialize_list(users)})
 
@@ -71,4 +107,34 @@ def create_person():
     db.session.commit()
     return create_response(
         message=f"Successfully created person {new_user.name} with id: {new_user._id}"
+    )
+
+# function that is called when you visit /sentences
+@main.route("/sentences", methods=["GET"])
+def get_sentences():
+    sentences = Sentence.query.all()
+    return create_response(data={"sentences": serialize_list(sentences)})
+
+# POST request for /sentences
+@main.route("/sentences", methods=["POST"])
+def create_sentence():
+    data = request.get_json()
+    # logger.info("Data recieved: %s", data)
+    # if "name" not in data:
+    #     msg = "No name provided for connection."
+    #     logger.info(msg)
+    #     return create_response(status=422, message=msg)
+    # if "host" not in data:
+    #     msg = "No host provided for connection."
+    #     logger.info(msg)
+    #     return create_response(status=422, message=msg)
+    #AGREGAR EL RESTO DE LOS FIELDS (REQUIRED)
+
+    # create SQLAlchemy Object
+    new_sentence = Sentence(sentence=data["sentence"], connection = data["connection"], comment = data["comment"])
+    # commit it to database
+    db.session.add(new_sentence)
+    db.session.commit()
+    return create_response(
+        message=f"Successfully created connection {new_sentence.name} with id: {new_sentence.id}"
     )
