@@ -18,11 +18,14 @@ def index():
 # function that is called when you visit /persons
 @main.route("/init", methods=["GET"])
 def init_data():
-
+    persons =[]
     person1 = Person(name="Aragorn")
     person2 = Person(name="Gandalf")
-    db.session.add(person1)
-    db.session.add(person2)
+    persons.append(person1)
+    persons.append(person2)
+    db.session.add_all(persons)
+    # db.session.add(person1)
+    # db.session.add(person2)
     db.session.commit()
     return "Data has been initialized :D"
 

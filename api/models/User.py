@@ -2,15 +2,15 @@ from api.core import Mixin
 from .base import db
 
 
-class Person(Mixin, db.Model):
-    """Person Table."""
-
-    __tablename__ = "person"
-
+class User(Mixin, db.Model):
+    """User Table."""
+    __tablename__ = "user"
     id = db.Column(db.Integer, unique=True, primary_key=True)
     name = db.Column(db.String, nullable=False)
-    emails = db.relationship("Email", backref="emails")
+    email = db.Column(db.String, nullable=False)
+    password = db.Column(db.String, nullable=False)
     connections = db.relationship("Connection", backref="connections")
+    sentences = db.relationship("Sentence", backref="sentences")
     
     def __init__(self, name: str):
         self.name = name
