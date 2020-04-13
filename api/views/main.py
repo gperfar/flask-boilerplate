@@ -1,53 +1,14 @@
 from flask import Blueprint, request
-from api.models import db, User, Sentence, Connection
+from api.models import db, User, Sentence, Connection, Postgres
 from api.core import create_response, serialize_list, logger
 from sqlalchemy import inspect
 import psycopg2, json
 
 main = Blueprint("main", __name__)  # initialize blueprint
 
-def start_db_connection(connection):
-    conn = None
-    try:
-        #Connect to the DB	
-        conn = psycopg2.connect(
-            host = connection.host,
-            database = connection.database, 
-            user = connection.username, 
-            password = connection.password)
-        return conn
-    except (Exception, psycopg2.DatabaseError) as error:
-        return(error)
-
-def end_db_connection(cur, conn):
-    # close the communication with the PostgreSQL
-    try:
-        cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
-        return True
-    
-def execute_sentence(sentence):
-    try:
-        connection = Connection.query.get(sentence.connection)
-        conn = start_db_connection(connection)
-        cur = conn.cursor()
-        cur.execute(sentence.sql_query)
-        results= cur.fetchall()
-        results_json = [dict(zip([key[0] for key in cur.description], row)) for row in results] #Googleada, ni idea cómo funciona pero it does
-        end_db_connection(cur,conn)
-        return results_json
-    except(Exception) as error:
-        return json.dumps({'status': "error",'message': error})
-
 # function that is called when you visit /
 @main.route("/")
 def index():
-    # you are now in the current application context with the main.route decorator
-    # access the logger with the logger from api.core and uses the standard logging module
-    # try using ipdb here :) you can inject yourself
-    logger.info("Hello, Ring Bearer")
     return "<h1>Hello, Ring Bearer</h1>"
 
 @main.app_errorhandler(404)
@@ -68,9 +29,8 @@ def runquery():
         return create_response(status=422, message=msg)
     sentence = Sentence(name="Temporary sentence", sql_query=data["query"], connection = data["connection_id"], comment = "Temporary sentence")
     connection = Connection.query.get(data["connection_id"])
-    #return json.dumps({'sentence': sentence.sql_query, 'connection': connection.name})
     try:
-        results_json = execute_sentence(sentence)
+        results_json = sentence.execute()
         return json.dumps({'connection_id':connection.id,'connection name': connection.name,'sentence': sentence.sql_query,'results': results_json})
     except(Exception) as error:
         create_response(status=500,message= error)
@@ -84,11 +44,8 @@ def runquery_get():
         return create_response(status=422, message=msg)
     sentence = Sentence.query.get(sentence_id)
     connection = Connection.query.get(sentence.connection)
-    try:
-        results_json = execute_sentence(sentence)
-        return json.dumps({'connection name': connection.name,'sentence': sentence.sql_query,'results': results_json})
-    except(Exception) as error:
-        create_response({'status': 422,'message': error})
+    results_json = sentence.execute()
+    return json.dumps({'connection name': connection.name,'sentence': sentence.sql_query,'results': results_json})
 
 # function that is called when you visit /persons
 @main.route("/init", methods=["GET"])
@@ -101,12 +58,12 @@ def init_data():
     db.session.commit()
     #Connections
     dummyconnections =[]
-    connection1 = Connection(name="Aragorn's Connection 1", host="AragornStrider.gondor.com", database="Gondor", username = "userr", password = "password", comment = "",user = 1)
-    connection2 = Connection(name="Aragorn's Connection 2", host="AragornStrider2.gondor.com", database="Gondor2", username = "userr2", password = "password2",comment = "", user = 1)
-    connection3 = Connection(name = "Real Connection", host = "drona.db.elephantsql.com", database = "uvqhwsnn", username = "uvqhwsnn", password = "mzwjhs6qcqZHTm-ecCXJkQ3FoLViB9RT", comment = "Conexión real! Base Northwind", user = 2)
-    dummyconnections.append(connection1)
-    dummyconnections.append(connection2)
-    dummyconnections.append(connection3)
+    postgres1 = Postgres(name="Aragorn's Connection 1", host="AragornStrider.gondor.com", database="Gondor", username = "userr", password = "password", comment = "",user = 1)
+    postgres2 = Postgres(name="Aragorn's Connection 2", host="AragornStrider2.gondor.com", database="Gondor2", username = "userr2", password = "password2",comment = "", user = 1)
+    postgres3 = Postgres(name = "Real Connection", host = "drona.db.elephantsql.com", database = "uvqhwsnn", username = "uvqhwsnn", password = "mzwjhs6qcqZHTm-ecCXJkQ3FoLViB9RT", comment = "Conexión real! Base Northwind", user = 2)
+    dummyconnections.append(postgres1)
+    dummyconnections.append(postgres2)
+    dummyconnections.append(postgres3)
     db.session.add_all(dummyconnections)
     db.session.commit()
     #Sentences
@@ -125,6 +82,10 @@ def get_connections():
     connections = Connection.query.all()
     return create_response(data={"connections": serialize_list(connections)})
 
+@main.route("/connections/postgres", methods=["GET"])
+def get_postgres():
+    postgres = Postgres.query.all()
+    return create_response(data={"postgres": serialize_list(postgres)})
 # POST request for /connections
 @main.route("/connections", methods=["POST"])
 def create_connection():
@@ -156,13 +117,18 @@ def create_connection():
         return create_response(status=422, message=msg)
     if "comment" not in data:
         data["comment"] = ""
+    if ("type" not in data):
+        msg = "No type provided for connection."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
     # create SQLAlchemy Object
-    new_connection = Connection(name=data["name"], host = data["host"], database = data["database"], username = data["username"], password = data["password"], user = data["user_id"], comment = data["comment"])
+    if data["type"] == "postgres":
+        new_postgres = Postgres(name=data["name"], host = data["host"], database = data["database"], username = data["username"], password = data["password"], user = data["user_id"], comment = data["comment"])
     # commit it to database
-    db.session.add(new_connection)
+    db.session.add(new_postgres)
     db.session.commit()
     return create_response(
-        message=f"Successfully created connection {new_connection.name} with id: {new_connection.id}"
+        message=f"Successfully created connection {new_postgres.name} with id: {new_postgres.id}"
     )
 
 # function that is called when you visit /users

@@ -3,9 +3,9 @@
 # to prevent circular dependencies
 from .Sentence import Sentence
 from .User import User
-from .Connection import Connection
+from .Connection import Connection, Postgres
 from .base import db
 
-__all__ = ["User", "Connection", "Sentence", "db"]
+__all__ = ["User", "Connection", "Postgres", "Sentence", "db"]
 
 # You must import all of the new Models you create to this page
