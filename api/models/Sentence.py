@@ -25,7 +25,7 @@ class Sentence(Mixin, db.Model):
         return f"<Sentence {self.name}>"
 
     def execute(self):
-        connection = Postgres.query.get(self.connection)
+        connection = Connection.query.get(self.connection)
         conn = connection.start_connection()
         cur = conn.cursor()
         cur.execute(self.sql_query)
