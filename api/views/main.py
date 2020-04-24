@@ -79,13 +79,21 @@ def init_data():
 # function that is called when you visit /connections
 @main.route("/connections", methods=["GET"])
 def get_connections():
-    connections = Connection.query.all()
-    return create_response(data={"connections": serialize_list(connections)})
+    query_params = request.args
+    connection_id = query_params.get('id')
+    if (not(connection_id)):
+        postgres = Postgres.query.all()
+        return create_response(data={"connections": serialize_list(postgres)})
+    connection_details = Connection.query.get(connection_id).get_fields()
+    #return str(connection_details)
+    return create_response(data={"connection_details": connection_details})
 
 @main.route("/connections/postgres", methods=["GET"])
 def get_postgres():
     postgres = Postgres.query.all()
     return create_response(data={"postgres": serialize_list(postgres)})
+
+
 # POST request for /connections
 @main.route("/connections", methods=["POST"])
 def create_connection():

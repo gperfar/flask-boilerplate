@@ -25,6 +25,14 @@ class Connection(Mixin, db.Model):
         if(self.type == "postgres"):
             return Postgres.query.get(self.id).start_connection()
 
+    def get_fields(self):
+        if(self.type == "postgres"):
+            raw_dict = Postgres.query.get(self.id).__dict__
+            raw_dict.pop('_sa_instance_state', None) 
+            return raw_dict           
+
+
+
 class Postgres(Connection):
     __tablename__ = "postgres"
 
