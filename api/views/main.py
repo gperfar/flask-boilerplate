@@ -83,7 +83,13 @@ def get_connections():
     connection_id = query_params.get('id')
     if (not(connection_id)):
         postgres = Postgres.query.all()
-        return create_response(data={"connections": serialize_list(postgres)})
+        response_postgres = []
+        for p in serialize_list(postgres):
+            p.pop('password', None) 
+            p.pop('_id', None) 
+            p.pop('user', None) 
+            response_postgres.append(p)
+        return create_response(data={"connections": response_postgres})
     connection_details = Connection.query.get(connection_id).get_fields()
     #return str(connection_details)
     return create_response(data={"connection_details": connection_details})
