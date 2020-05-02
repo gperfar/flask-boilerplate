@@ -1,5 +1,5 @@
 from flask import Blueprint, request
-from api.models import db, User, Sentence, Connection, Postgres
+from api.models import db, User, Sentence, Connection, Postgres, Visualization, VisualizationLineChart
 from api.core import create_response, serialize_list, logger
 from sqlalchemy import inspect
 import psycopg2, json
@@ -72,6 +72,13 @@ def init_data():
     db.session.add(sentence1)
     db.session.add(sentence2)
     db.session.commit()
+    #Visualizations
+    visual1 = VisualizationLineChart(name="Line Chart 1 - black", sentence = 2, comment = "Based on the real Sentence on the real Connection - 1", color = "black")
+    visual2 = VisualizationLineChart(name="Line Chart 2 - grey", sentence = 2, comment = "Based on the real Sentence on the real Connection - 2", color = "grey")
+    db.session.add(visual1)
+    db.session.add(visual2)
+    db.session.commit()
+
     msg = "Data has been initialized :D"
     return create_response(status=200, message=msg)
 
@@ -82,14 +89,14 @@ def get_connections():
     query_params = request.args
     connection_id = query_params.get('id')
     if (not(connection_id)):
-        postgres = Postgres.query.all()
-        response_postgres = []
-        for p in serialize_list(postgres):
-            p.pop('password', None) 
-            p.pop('_id', None) 
-            p.pop('user', None) 
-            response_postgres.append(p)
-        return create_response(data={"connections": response_postgres})
+        connections = Connection.query.all()    #####SHOULD BE CONNECTIONS, NOT ONLY POSTGRESQL
+        response_connections = []
+        for c in serialize_list(connections):
+            c.pop('_id', None) 
+            c.pop('user', None) 
+            response_connections.append(c)
+        return create_response(data={"connections": response_connections})
+    ###### If there was a specific connection as parameter...
     connection_details = Connection.query.get(connection_id).get_fields()
     #return str(connection_details)
     return create_response(data={"connection_details": connection_details})
@@ -211,4 +218,43 @@ def create_sentence():
     db.session.commit()
     return create_response(
         message=f"Successfully created sentence {new_sentence.name} with id: {new_sentence.id}"
+    )
+
+# function that is called when you visit /visualizations
+@main.route("/visualizations", methods=["GET"])
+def get_visualizations():
+    visualizations = Visualization.query.all()
+    return create_response(data={"visualizations": serialize_list(visualizations)})
+
+# POST request for /visualizations
+@main.route("/visualizations", methods=["POST"])
+def create_visualization():
+    data = request.get_json()
+    logger.info("Data recieved: %s", data)
+    if "name" not in data:
+        msg = "No name provided for visualization."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
+    if "sentence_id" not in data:
+        msg = "No sentence ID provided for visualization."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
+    if "comment" not in data:
+        data["comment"] = ""
+    # create SQLAlchemy Object
+    if data["type"] == "linechart":
+        if data["color"] not in data:
+            msg = "No color provided for line chart visualization."
+            logger.info(msg)
+            return create_response(status=422, message=msg)
+        new_visualization = VisualizationLineChart(
+            name = data["name"], 
+            sentence = data["sentence_id"], 
+            comment = data["comment"],
+            color = data["color"]) ##TESTTTTT
+    # commit it to database
+    db.session.add(new_visualization)
+    db.session.commit()
+    return create_response(
+        message=f"Successfully created visualization {new_visualization.name} with id: {new_visualization.id}"
     )

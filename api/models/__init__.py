@@ -4,8 +4,15 @@
 from .Sentence import Sentence
 from .User import User
 from .Connection import Connection, Postgres
+from .Visualization import Visualization, VisualizationLineChart
 from .base import db
 
-__all__ = ["User", "Connection", "Postgres", "Sentence", "db"]
+__all__ = [
+    "db",
+    "User", 
+    "Connection", "Postgres", 
+    "Sentence", 
+    "Visualization", "VisualizationLineChart"
+    ]
 
 # You must import all of the new Models you create to this page
