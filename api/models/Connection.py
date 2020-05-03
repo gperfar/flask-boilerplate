@@ -9,13 +9,14 @@ class Connection(Mixin, db.Model):
     id = db.Column(db.Integer, unique=True, primary_key=True)
     name = db.Column(db.String, nullable=False)
     comment = db.Column(db.String, nullable=True)
-    user = db.Column(db.Integer, db.ForeignKey("user.id", ondelete="CASCADE"), nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id", ondelete="CASCADE"), nullable=True)
     type = db.Column(db.String, nullable=False)
+    sentences = db.relationship('Sentence', backref='connection', lazy=True)
 
-    def __init__(self, name: str, comment:str, user:int, type:str):
+    def __init__(self, name: str, comment:str, user_id:int, type:str):
         self.name = name
         self.comment = comment
-        self.user = user
+        self.user_id = user_id
         self.type = type
 
     def __repr__(self):
@@ -46,8 +47,8 @@ class Postgres(Connection):
     username = db.Column(db.String, nullable=False)
     password = db.Column(db.String, nullable=False)
 
-    def __init__(self, name: str, host:str, database:str, username:str, password:str, comment:str, user:int):
-        super().__init__(name=name,user= user,comment= comment, type = "postgres")
+    def __init__(self, name: str, host:str, database:str, username:str, password:str, comment:str, user_id:int):
+        super().__init__(name=name,user_id= user_id,comment= comment, type = "postgres")
         self.host = host
         self.database = database
         self.username = username

@@ -12,13 +12,14 @@ class Sentence(Mixin, db.Model):
     id = db.Column(db.Integer, unique=True, primary_key=True)
     name = db.Column(db.String, nullable=False)
     sql_query = db.Column(db.String, nullable=False)
-    connection = db.Column(db.Integer, db.ForeignKey("connection.id", ondelete="CASCADE"), nullable=False)
+    connection_id = db.Column(db.Integer, db.ForeignKey("connection.id", ondelete="CASCADE"), nullable=False)
     comment = db.Column(db.String, nullable=True)
+    visualizations = db.relationship('Visualization', backref='sentence', lazy=True)
 
-    def __init__(self, name:str, sql_query:str, connection:int, comment:str):
+    def __init__(self, name:str, sql_query:str, connection_id:int, comment:str):
         self.name = name
         self.sql_query = sql_query
-        self.connection = connection
+        self.connection_id = connection_id
         self.comment = comment
 
     def __repr__(self):

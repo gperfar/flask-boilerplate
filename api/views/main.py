@@ -1,5 +1,5 @@
 from flask import Blueprint, request
-from api.models import db, User, Sentence, Connection, Postgres, Visualization, VisualizationLineChart
+from api.models import db, User, Sentence, Connection, Postgres, Visualization, VisualizationLineChart, Dashboard
 from api.core import create_response, serialize_list, logger
 from sqlalchemy import inspect
 import psycopg2, json
@@ -58,27 +58,33 @@ def init_data():
     db.session.commit()
     #Connections
     dummyconnections =[]
-    postgres1 = Postgres(name="Aragorn's Connection 1", host="AragornStrider.gondor.com", database="Gondor", username = "userr", password = "password", comment = "",user = 1)
-    postgres2 = Postgres(name="Aragorn's Connection 2", host="AragornStrider2.gondor.com", database="Gondor2", username = "userr2", password = "password2",comment = "", user = 1)
-    postgres3 = Postgres(name = "Real Connection", host = "drona.db.elephantsql.com", database = "uvqhwsnn", username = "uvqhwsnn", password = "mzwjhs6qcqZHTm-ecCXJkQ3FoLViB9RT", comment = "Conexión real! Base Northwind", user = 2)
+    postgres1 = Postgres(name="Aragorn's Connection 1", host="AragornStrider.gondor.com", database="Gondor", username = "userr", password = "password", comment = "",user_id = 1)
+    postgres2 = Postgres(name="Aragorn's Connection 2", host="AragornStrider2.gondor.com", database="Gondor2", username = "userr2", password = "password2",comment = "", user_id = 1)
+    postgres3 = Postgres(name = "Real Connection", host = "drona.db.elephantsql.com", database = "uvqhwsnn", username = "uvqhwsnn", password = "mzwjhs6qcqZHTm-ecCXJkQ3FoLViB9RT", comment = "Conexión real! Base Northwind", user_id = 2)
     dummyconnections.append(postgres1)
     dummyconnections.append(postgres2)
     dummyconnections.append(postgres3)
     db.session.add_all(dummyconnections)
     db.session.commit()
     #Sentences
-    sentence1 = Sentence(name="Sentence 1", sql_query="SELECT * FROM people WHERE kingdom = 'Rohan'", connection = 1, comment = "Keeping tabs on the Rohirrim")
-    sentence2 = Sentence(name="Sentence 2", sql_query="SELECT * FROM Customers", connection = 3, comment = "Keeping tabs on Customers") 
+    sentence1 = Sentence(name="Sentence 1", sql_query="SELECT * FROM people WHERE kingdom = 'Rohan'", connection_id = 1, comment = "Keeping tabs on the Rohirrim")
+    sentence2 = Sentence(name="Sentence 2", sql_query="SELECT * FROM Customers", connection_id = 3, comment = "Keeping tabs on Customers") 
     db.session.add(sentence1)
     db.session.add(sentence2)
     db.session.commit()
     #Visualizations
-    visual1 = VisualizationLineChart(name="Line Chart 1 - black", sentence = 2, comment = "Based on the real Sentence on the real Connection - 1", color = "black")
-    visual2 = VisualizationLineChart(name="Line Chart 2 - grey", sentence = 2, comment = "Based on the real Sentence on the real Connection - 2", color = "grey")
+    visual1 = VisualizationLineChart(name="Line Chart 1 - black", sentence_id = 2, comment = "Based on the real Sentence on the real Connection - 1", color = "black")
+    visual2 = VisualizationLineChart(name="Line Chart 2 - grey", sentence_id = 2, comment = "Based on the real Sentence on the real Connection - 2", color = "grey")
     db.session.add(visual1)
     db.session.add(visual2)
     db.session.commit()
-
+    #Visualizations
+    dash1 = Dashboard(name="Dashboard 1", comment = "No comment - 1")
+    dash1.visualizations.append(visual1)
+    dash2 = Dashboard(name="Dashboard 2", comment = "Dashboard with no comment - 2")
+    db.session.add(dash1)
+    db.session.add(dash2)
+    db.session.commit()
     msg = "Data has been initialized :D"
     return create_response(status=200, message=msg)
 
@@ -89,11 +95,10 @@ def get_connections():
     query_params = request.args
     connection_id = query_params.get('id')
     if (not(connection_id)):
-        connections = Connection.query.all()    #####SHOULD BE CONNECTIONS, NOT ONLY POSTGRESQL
+        connections = Connection.query.all()
         response_connections = []
         for c in serialize_list(connections):
             c.pop('_id', None) 
-            c.pop('user', None) 
             response_connections.append(c)
         return create_response(data={"connections": response_connections})
     ###### If there was a specific connection as parameter...
@@ -257,4 +262,33 @@ def create_visualization():
     db.session.commit()
     return create_response(
         message=f"Successfully created visualization {new_visualization.name} with id: {new_visualization.id}"
+    )
+
+
+    # function that is called when you visit /dashboards
+@main.route("/dashboards", methods=["GET"])
+def get_dashboards():
+    dashboards = Dashboard.query.all()
+    return create_response(data={"dashboards": serialize_list(dashboards)})
+
+# POST request for /dashboards
+@main.route("/dashboards", methods=["POST"])
+def create_dashboard():
+    data = request.get_json()
+    logger.info("Data recieved: %s", data)
+    if "name" not in data:
+        msg = "No name provided for dashboard."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
+    if "comment" not in data:
+        data["comment"] = ""
+    # create SQLAlchemy Object
+    new_dashboard = Dashboard(
+        name = data["name"], 
+        comment = data["comment"])
+    # commit it to database
+    db.session.add(new_dashboard)
+    db.session.commit()
+    return create_response(
+        message=f"Successfully created dashboard {new_dashboard.name} with id: {new_dashboard.id}"
     )
