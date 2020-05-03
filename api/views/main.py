@@ -35,7 +35,7 @@ def runquery():
     except(Exception) as error:
         create_response(status=500,message= error)
 
-@main.route('/runquery', methods=['GET']) #PROBAR SIEMPRE CON LA CONNECTION DE ID 3 Y SENTENCE DE ID 2
+@main.route('/runquery', methods=['GET']) 
 def runquery_get():
     query_params = request.args
     sentence_id = query_params.get('sentence_id')
@@ -43,9 +43,8 @@ def runquery_get():
         msg = "Missing sentence_id" 
         return create_response(status=422, message=msg)
     sentence = Sentence.query.get(sentence_id)
-    connection = Connection.query.get(sentence.connection)
     results_json = sentence.execute()
-    return json.dumps({'connection name': connection.name,'sentence': sentence.sql_query,'results': results_json})
+    return json.dumps({'connection name': sentence.connection.name,'sentence': sentence.sql_query,'results': results_json})
 
 # function that is called when you visit /persons
 @main.route("/init", methods=["GET"])

@@ -3,7 +3,6 @@ from .base import db
 from api.core import create_response, serialize_list, logger
 from sqlalchemy import inspect
 import psycopg2, json
-from .Connection import Connection, Postgres
 
 # Note that we use sqlite for our tests, so you can't use Postgres Arrays
 class Sentence(Mixin, db.Model):
@@ -26,8 +25,8 @@ class Sentence(Mixin, db.Model):
         return f"<Sentence {self.name}>"
 
     def execute(self):
-        connection = Connection.query.get(self.connection)
-        conn = connection.start_connection()
+        # connection = Connection.query.get(self.connection)
+        conn = self.connection.start_connection()
         cur = conn.cursor()
         cur.execute(self.sql_query)
         results= cur.fetchall()
