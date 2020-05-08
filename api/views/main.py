@@ -97,7 +97,6 @@ def get_connections():
         connections = Connection.query.all()
         response_connections = []
         for c in serialize_list(connections):
-            c.pop('_id', None) 
             response_connections.append(c)
         return create_response(data={"connections": response_connections})
     ###### If there was a specific connection as parameter...
