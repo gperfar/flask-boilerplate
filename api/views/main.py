@@ -15,19 +15,19 @@ def index():
 def page_not_found(e):
     return "<h1>404: Not found</h1><p>\" I have no memory of this place\".</p><p>Gandalf the Grey</p> <img src=\"https://media1.tenor.com/images/034e7f9bd0df198f758dad87858b0004/tenor.gif?itemid=9228837\">", 404
     
-@main.route('/runquery', methods=['POST'])
-def runquery():
+@main.route('/runtemporaryquery', methods=['POST'])
+def runtemporaryquery():
     data = request.get_json()
     logger.info("Data recieved: %s", data)
     if "connection_id" not in data:
         msg = "You can't run a query if you don't specify which connection to use."
         logger.info(msg)
         return create_response(status=422, message=msg)
-    if "query" not in data:
+    if "sql_query" not in data:
         msg = "You can't run a query if you don't give me the query..."
         logger.info(msg)
         return create_response(status=422, message=msg)
-    sentence = Sentence(name="Temporary sentence", sql_query=data["query"], connection = data["connection_id"], comment = "Temporary sentence")
+    sentence = Sentence(name="Temporary sentence", sql_query=data["sql_query"], connection_id = data["connection_id"], comment = "Temporary sentence")
     connection = Connection.query.get(data["connection_id"])
     try:
         results_json = sentence.execute()
