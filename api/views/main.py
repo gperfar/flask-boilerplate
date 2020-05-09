@@ -27,11 +27,13 @@ def runtemporaryquery():
         msg = "You can't run a query if you don't give me the query..."
         logger.info(msg)
         return create_response(status=422, message=msg)
-    sentence = Sentence(name="Temporary sentence", sql_query=data["sql_query"], connection_id = data["connection_id"], comment = "Temporary sentence")
-    connection = Connection.query.get(data["connection_id"])
     try:
-        results_json = sentence.execute()
-        return json.dumps({'connection_id':connection.id,'connection name': connection.name,'sentence': sentence.sql_query,'results': results_json})
+        conn = Connection.query.get(data["connection_id"]).start_connection()
+        cur = conn.cursor()
+        cur.execute(data["sql_query"])
+        results= cur.fetchall()
+        results_json = [dict(zip([key[0] for key in cur.description], row)) for row in results] #Googleada, ni idea cómo funciona pero it does
+        return json.dumps({'sentence': data["sql_query"],'results': results_json})
     except(Exception) as error:
         create_response(status=500,message= error)
 
