@@ -97,13 +97,9 @@ def get_connections():
     connection_id = query_params.get('id')
     if (not(connection_id)):
         connections = Connection.query.all()
-        response_connections = []
-        for c in serialize_list(connections):
-            response_connections.append(c)
-        return create_response(data={"connections": response_connections})
+        return create_response(data={"connections": connections})
     ###### If there was a specific connection as parameter...
     connection_details = Connection.query.get(connection_id).get_fields()
-    #return str(connection_details)
     return create_response(data={"connection_details": connection_details})
 
 @main.route("/connections/postgres", methods=["GET"])
@@ -194,8 +190,16 @@ def create_person():
 # function that is called when you visit /sentences
 @main.route("/sentences", methods=["GET"])
 def get_sentences():
-    sentences = Sentence.query.all()
-    return create_response(data={"sentences": serialize_list(sentences)})
+    query_params = request.args
+    sentence_id = query_params.get('id')
+    if (not(sentence_id)):
+        sentences = Sentence.query.all()
+        return create_response(data={"connections": sentences})
+    ###### If there was a specific sentence as parameter...
+    sentence_details = Sentence.query.get(sentence_id).__dict__
+    sentence_details.pop('_sa_instance_state', None)
+    return create_response(data={"sentence": sentence_details})
+
 
 # POST request for /sentences
 @main.route("/sentences", methods=["POST"])
