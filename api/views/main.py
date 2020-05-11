@@ -194,7 +194,7 @@ def get_sentences():
     sentence_id = query_params.get('id')
     if (not(sentence_id)):
         sentences = Sentence.query.all()
-        return create_response(data={"connections": serialize_list(sentences)})
+        return create_response(data={"sentences": serialize_list(sentences)})
     ###### If there was a specific sentence as parameter...
     sentence_details = Sentence.query.get(sentence_id).__dict__
     sentence_details.pop('_sa_instance_state', None)
