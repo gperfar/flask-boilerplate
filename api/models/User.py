@@ -19,3 +19,8 @@ class User(Mixin, db.Model):
         self.password = password
     def __repr__(self):
         return f"<User {self.name}>"
+
+    def match_password(self, password: str):
+        if (password == self.password):
+            return True
+        return False

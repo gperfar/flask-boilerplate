@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 from api.models import db, User, Sentence, Connection, Postgres, Visualization, VisualizationLineChart, Dashboard
 from api.core import create_response, serialize_list, logger
-from sqlalchemy import inspect
+from sqlalchemy import inspect, func
 import psycopg2, json
 
 main = Blueprint("main", __name__)  # initialize blueprint
@@ -296,3 +296,41 @@ def create_dashboard():
     return create_response(
         message=f"Successfully created dashboard {new_dashboard.name} with id: {new_dashboard.id}"
     )
+
+@main.route("/logintest", methods=["GET"])
+def login_test():
+    query_params = request.args
+    email = query_params.get('email')
+    password = query_params.get('password')
+    try:
+        user = db.session.query(User).filter(User.email == email).first()
+        successful_login = user.match_password(password = password)
+        if successful_login:
+            return create_response(message = "Welcome, you coding beast")
+        return create_response(message = "You shall not pass!")
+    except:
+        return create_response(message = "You shall not pass!")
+
+@main.route("/login", methods=["POST"])
+def login():
+    data = request.get_json()
+    if "email" not in data:
+        msg = "No email provided for login."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
+    if "password" not in data:
+        msg = "No password provided for login."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
+    query_params = request.args
+    email = data["email"]
+    password = data["password"]
+    try:
+        user = db.session.query(User).filter(func.lower(User.email) == email.lower()).first()
+        successful_login = user.match_password(password = password)
+        if successful_login:
+            # Identity can be any data that is json serializable
+            return create_response(message = str(user.id))
+        return create_response(status=400, message = "You shall not pass!")
+    except:
+        return create_response(status=400, message = "You shall not pass!")

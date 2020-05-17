@@ -9,7 +9,6 @@ from sqlalchemy_utils import create_database, database_exists
 from api.config import config
 from api.core import all_exception_handler
 
-
 class RequestFormatter(logging.Formatter):
     def format(self, record):
         record.url = request.url
