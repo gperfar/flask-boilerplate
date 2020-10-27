@@ -48,9 +48,16 @@ def runquery_get():
     results_json = sentence.execute()
     return json.dumps({'connection name': sentence.connection.name,'sentence': sentence.sql_query,'results': results_json})
 
-# function that is called when you visit /persons
+# function that is called when you visit /init
 @main.route("/init", methods=["GET"])
 def init_data():
+    query_params = request.args
+    user_id = query_params.get('user')
+    if (not(user_id)):
+        msg = "No user provided for init."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
+    # return user_id
     #Users
     dummyusers =[]
     dummyusers.append(User(name="Aragorn", email="AragornStrider@gondor.com", password="KingOfGondor123"))
@@ -59,9 +66,9 @@ def init_data():
     db.session.commit()
     #Connections
     dummyconnections =[]
-    postgres1 = Postgres(name="Aragorn's Connection 1", host="AragornStrider.gondor.com", database="Gondor", username = "userr", password = "password", comment = "",user_id = 1)
-    postgres2 = Postgres(name="Aragorn's Connection 2", host="AragornStrider2.gondor.com", database="Gondor2", username = "userr2", password = "password2",comment = "", user_id = 1)
-    postgres3 = Postgres(name = "Real Connection", host = "drona.db.elephantsql.com", database = "uvqhwsnn", username = "uvqhwsnn", password = "mzwjhs6qcqZHTm-ecCXJkQ3FoLViB9RT", comment = "Conexión real! Base Northwind", user_id = 2)
+    postgres1 = Postgres(name="Aragorn's Connection 1", host="AragornStrider.gondor.com", database="Gondor", username = "userr", password = "password", comment = "",user_id = user_id)
+    postgres2 = Postgres(name="Aragorn's Connection 2", host="AragornStrider2.gondor.com", database="Gondor2", username = "userr2", password = "password2",comment = "", user_id = user_id)
+    postgres3 = Postgres(name = "Real Connection", host = "drona.db.elephantsql.com", database = "uvqhwsnn", username = "uvqhwsnn", password = "mzwjhs6qcqZHTm-ecCXJkQ3FoLViB9RT", comment = "Conexión real! Base Northwind", user_id = user_id)
     dummyconnections.append(postgres1)
     dummyconnections.append(postgres2)
     dummyconnections.append(postgres3)

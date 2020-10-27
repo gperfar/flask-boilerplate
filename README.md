@@ -1,3 +1,30 @@
+FRONT-END
+If it's the first time running the repo:
+npm install
+
+To start the server:
+npm run
+
+BACK-END
+
+To start the server:
+docker-compose up
+
+To stop the server: 
+docker-compose stop
+
+To rebuild the DB in dev:
+
+docker-compose exec app bash
+python manage.py recreate_db
+
+To rebuild the DB in prod:
+
+heroku login (and log in)
+heroku run bash -a gperfar-utn
+Once there, python manage.py recreate_db
+
+
 # Flask Boilerplate [![CircleCI](https://circleci.com/gh/tko22/flask-boilerplate/tree/master.svg?style=svg&circle-token=:circle-token)](https://circleci.com/gh/tko22/flask-boilerplate/tree/master) <a href="https://github.com/ambv/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)

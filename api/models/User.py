@@ -11,8 +11,8 @@ class User(Mixin, db.Model):
     name = db.Column(db.String, nullable=False)
     email = db.Column(db.String, unique=True, nullable=False)
     password = db.Column(db.String, nullable=False)
-    connections = db.relationship('Connection', backref='user', lazy=True)
-
+    # connections = db.relationship('Connection', backref='user', lazy=True)
+    
     def __init__(self, name: str, email:str, password:str):
         self.name = name
         self.email = email

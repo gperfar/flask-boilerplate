@@ -9,7 +9,7 @@ class Connection(Mixin, db.Model):
     id = db.Column(db.Integer, unique=True, primary_key=True)
     name = db.Column(db.String, nullable=False)
     comment = db.Column(db.String, nullable=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id", ondelete="CASCADE"), nullable=True)
+    user_id = db.Column(db.String, nullable=False)
     type = db.Column(db.String, nullable=False)
     sentences = db.relationship('Sentence', backref='connection', lazy=True)
 
