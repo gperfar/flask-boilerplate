@@ -228,7 +228,7 @@ def create_sentence():
     if "comment" not in data:
         data["comment"] = ""
     # create SQLAlchemy Object
-    new_sentence = Sentence(name = data["name"], sql_query=data["sql_query"], connection = data["connection_id"], comment = data["comment"])
+    new_sentence = Sentence(name = data["name"], sql_query=data["sql_query"], connection_id = data["connection_id"], comment = data["comment"])
     # commit it to database
     db.session.add(new_sentence)
     db.session.commit()
