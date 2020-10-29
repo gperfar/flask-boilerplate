@@ -209,7 +209,7 @@ def get_sentences():
 
 
 # POST request for /sentences
-@main.route("/sentences", methods=["POST"])
+@main.route("/sentence/create", methods=["POST"])
 def create_sentence():
     data = request.get_json()
     logger.info("Data recieved: %s", data)
@@ -234,6 +234,43 @@ def create_sentence():
     db.session.commit()
     return create_response(
         message=f"Successfully created sentence {new_sentence.name} with id: {new_sentence.id}"
+    )
+
+# POST request for /sentences
+@main.route("/sentence/edit", methods=["POST"])
+def edit_sentence():
+    data = request.get_json()
+    logger.info("Data recieved: %s", data)
+    if "sentence_id" not in data:
+        msg = "No sentence ID provided for sentence."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
+    if "name" not in data:
+        msg = "No name provided for sentence."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
+    if "sql_query" not in data:
+        msg = "No SQL query provided for sentence."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
+    if "connection_id" not in data:
+        msg = "No connection ID provided for sentence."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
+    if "comment" not in data:
+        data["comment"] = ""
+    # Fetch Sentence
+    sentence = Sentence.query.get(data["sentence_id"])
+    # Perform edit
+    sentence.connection_id = data["connection_id"]
+    sentence.name = data["name"]
+    sentence.sql_query = data["sql_query"]
+    sentence.comment = data["comment"]
+    # commit it to database
+    # db.session.add(new_sentence)
+    db.session.commit()
+    return create_response(
+        message=f"Successfully edited sentence {sentence.name} with id: {sentence.id}"
     )
 
 # function that is called when you visit /visualizations
