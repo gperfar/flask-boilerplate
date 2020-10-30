@@ -273,6 +273,23 @@ def edit_sentence():
         message=f"Successfully edited sentence {sentence.name} with id: {sentence.id}"
     )
 
+# Delete sentence
+@main.route("/sentence/delete", methods=["POST"])
+def delete_sentence():
+    data = request.get_json()
+    logger.info("Data recieved: %s", data)
+    if "sentence_id" not in data:
+        msg = "No sentence ID provided for sentence."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
+    # Fetch Sentence and delete
+    db.session.query(Sentence).filter(Sentence.id == data["sentence_id"]).delete()
+    # Commit it to database
+    db.session.commit()
+    return create_response(
+        message=f"Successfully deleted sentence"
+    )
+
 # function that is called when you visit /visualizations
 @main.route("/visualizations", methods=["GET"])
 def get_visualizations():
