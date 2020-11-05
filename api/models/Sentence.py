@@ -13,7 +13,7 @@ class Sentence(Mixin, db.Model):
     sql_query = db.Column(db.String, nullable=False)
     connection_id = db.Column(db.Integer, db.ForeignKey("connection.id", ondelete="CASCADE"), nullable=False)
     comment = db.Column(db.String, nullable=True)
-    visualizations = db.relationship('Visualization', backref='sentence', lazy=True)
+    visualizations = db.relationship('Visualization', backref='sentence', lazy=True, cascade="all, delete-orphan")
 
     def __init__(self, name:str, sql_query:str, connection_id:int, comment:str):
         self.name = name

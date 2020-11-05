@@ -11,7 +11,7 @@ class Connection(Mixin, db.Model):
     comment = db.Column(db.String, nullable=True)
     user_id = db.Column(db.String, nullable=False)
     type = db.Column(db.String, nullable=False)
-    sentences = db.relationship('Sentence', backref='connection', lazy=True)
+    sentences = db.relationship('Sentence', backref='connection', lazy=True,cascade="all, delete-orphan")
 
     def __init__(self, name: str, comment:str, user_id:int, type:str):
         self.name = name
