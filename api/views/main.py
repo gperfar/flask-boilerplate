@@ -246,9 +246,35 @@ def get_sentences():
         sentences = Sentence.query.all()
         return create_response(data={"sentences": serialize_list(sentences)})
     ###### If there was a specific sentence as parameter...
-    sentence_details = Sentence.query.get(sentence_id).__dict__
+    sentence = Sentence.query.get(sentence_id)
+    sentence_details = sentence.__dict__
+    sentence_details.pop('_sa_instance_state', None)
+    # return sentence.connection.user_id
+    return create_response(data={"sentence": sentence_details})
+    
+# Return (with user ID)
+@main.route("/sentences", methods=["POST"])
+def return_sentences():
+    data = request.get_json()
+    logger.info("Data recieved: %s", data)
+    if "user_id" not in data:
+        msg = "No user ID provided for sentences."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
+    if "sentence_id" not in data:
+        sentences = db.session.query(Sentence).join(Connection).filter(
+            Connection.user_id == data["user_id"]
+            ).all()
+        # return sentences 
+        return create_response(data={"sentences": serialize_list(sentences)})
+    sentence = db.session.query(Sentence).join(Connection).filter(
+        Sentence.ID == data["sentence_id"],
+        Sentence.connection.user_id == data["user_id"]
+        ).first()
+    sentence_details = sentence.__dict__
     sentence_details.pop('_sa_instance_state', None)
     return create_response(data={"sentence": sentence_details})
+    
 
 # Create
 @main.route("/sentence/create", methods=["POST"])
