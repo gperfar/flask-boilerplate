@@ -113,6 +113,28 @@ def get_connections():
     connection_details = Connection.query.get(connection_id).get_fields()
     return create_response(data={"connection_details": connection_details})
 
+# Return (with user ID)
+@main.route("/connections", methods=["POST"])
+def return_connections():
+    data = request.get_json()
+    logger.info("Data recieved: %s", data)
+    if "user_id" not in data:
+        msg = "No user ID provided for connection(s)."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
+    if "connection_id" not in data:
+        connections = db.session.query(Connection).filter(
+            Connection.user_id == data["user_id"]
+            ).all()
+        return create_response(data={"connections": serialize_list(connections)})
+    connection = db.session.query(Connection).filter(
+        Connection.id == data["connection_id"],
+        Connection.user_id == data["user_id"]
+        ).first()
+    connection_details = connection.__dict__
+    connection_details.pop('_sa_instance_state', None)
+    return create_response(data={"connection": connection_details})
+
 @main.route("/connections/postgres", methods=["GET"])
 def get_postgres():
     postgres = Postgres.query.all()
@@ -268,8 +290,8 @@ def return_sentences():
         # return sentences 
         return create_response(data={"sentences": serialize_list(sentences)})
     sentence = db.session.query(Sentence).join(Connection).filter(
-        Sentence.ID == data["sentence_id"],
-        Sentence.connection.user_id == data["user_id"]
+        Sentence.id == data["sentence_id"],
+        Connection.user_id == data["user_id"]
         ).first()
     sentence_details = sentence.__dict__
     sentence_details.pop('_sa_instance_state', None)
@@ -364,6 +386,29 @@ def get_visualizations():
     visualizations = Visualization.query.all()
     return create_response(data={"visualizations": serialize_list(visualizations)})
 
+# Return (with user ID)
+@main.route("/visualizations", methods=["POST"])
+def return_visualizations():
+    data = request.get_json()
+    logger.info("Data recieved: %s", data)
+    if "user_id" not in data:
+        msg = "No user ID provided for visualizations."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
+    if "visualization_id" not in data:
+        visualizations = db.session.query(Visualization).join(Sentence).join(Connection).filter(
+            Connection.user_id == data["user_id"]
+            ).all()
+        # return visualizations 
+        return create_response(data={"visualizations": serialize_list(visualizations)})
+    visualization = db.session.query(Visualization).join(Sentence).join(Connection).filter(
+        Visualization.id == data["visualization_id"],
+        Connection.user_id == data["user_id"]
+        ).first()
+    visualization_details = visualization.__dict__
+    visualization_details.pop('_sa_instance_state', None)
+    return create_response(data={"visualization": visualization_details})
+
 # Create
 @main.route("/visualization/create", methods=["POST"])
 def create_visualization():
@@ -456,6 +501,28 @@ def delete_visualization():
 def get_dashboards():
     dashboards = Dashboard.query.all()
     return create_response(data={"dashboards": serialize_list(dashboards)})
+
+# Return (with user ID)
+@main.route("/dashboards", methods=["POST"])
+def return_dashboards():
+    data = request.get_json()
+    logger.info("Data recieved: %s", data)
+    if "user_id" not in data:
+        msg = "No user ID provided for dashboards."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
+    if "dashboard_id" not in data:
+        dashboards = db.session.query(Dashboard).join(Visualization, Dashboard.visualizations).join(Sentence).join(Connection).filter(
+            Connection.user_id == data["user_id"]
+            ).all()
+        return create_response(data={"dashboards": serialize_list(dashboards)})
+    dashboard = db.session.query(Dashboard).join(Visualization, Dashboard.visualizations).join(Sentence).join(Connection).filter(
+        Dashboard.id == data["dashboard_id"],
+        Connection.user_id == data["user_id"]
+        ).first()
+    dashboard_details = dashboard.__dict__
+    dashboard_details.pop('_sa_instance_state', None)
+    return create_response(data={"dashboard": dashboard_details})
 
 # Create
 @main.route("/dashboard/create", methods=["POST"])
