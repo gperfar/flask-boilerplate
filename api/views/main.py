@@ -48,6 +48,26 @@ def runquery_get():
     results_json = sentence.execute()
     return json.dumps({'connection name': sentence.connection.name,'sentence': sentence.sql_query,'results': results_json})
 
+@main.route('/runquery', methods=['POST']) 
+def runquery_post():
+    data = request.get_json()
+    logger.info("Data recieved: %s", data)
+    if "user_id" not in data:
+        msg = "No user ID provided."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
+    if "sentence_id" not in data:
+        msg = "No sentence ID provided."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
+    sentence = Sentence.query.get(data["sentence_id"])
+    if sentence.connection.user_id == data["user_id"]:
+        results_json = sentence.execute()
+        return json.dumps({'connection name': sentence.connection.name,'sentence': sentence.sql_query,'results': results_json})
+    msg = "Sentence is not able to execute: user does not have access."
+    logger.info(msg)
+    return create_response(status=422, message=msg)
+
 # Init
 @main.route("/init", methods=["GET"])
 def init_data():
