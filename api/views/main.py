@@ -142,7 +142,7 @@ def return_connections():
         msg = "No user ID provided for connection(s)."
         logger.info(msg)
         return create_response(status=422, message=msg)
-    if "connection_id" not in data:
+    if "connection_id" not in data: #We return all connections
         connections = db.session.query(Connection).filter(
             Connection.user_id == data["user_id"]
             ).all()
@@ -151,7 +151,7 @@ def return_connections():
         Connection.id == data["connection_id"],
         Connection.user_id == data["user_id"]
         ).first()
-    connection_details = connection.__dict__
+    connection_details = connection.get_fields()
     connection_details.pop('_sa_instance_state', None)
     return create_response(data={"connection": connection_details})
 

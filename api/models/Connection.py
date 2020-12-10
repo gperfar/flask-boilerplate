@@ -30,9 +30,9 @@ class Connection(Mixin, db.Model):
         if(self.type == "postgres"):
             raw_dict = Postgres.query.get(self.id).__dict__
             raw_dict.pop('_sa_instance_state', None) 
-            raw_dict.pop('password', None) 
+            # raw_dict.pop('password', None) 
             raw_dict.pop('id', None) 
-            raw_dict.pop('user', None) 
+            raw_dict.pop('user_id', None) 
 
             return raw_dict           
 
