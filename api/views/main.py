@@ -160,6 +160,13 @@ def get_postgres():
     postgres = Postgres.query.all()
     return create_response(data={"postgres": serialize_list(postgres)})
 
+@main.route("/connections/types", methods=["GET"])
+def get_connection_types():
+    types = []
+    for connection in Connection.query.distinct(Connection.type):
+        types.append(connection.type)
+    return create_response(message="Type retrieval was a total success!", data={"connection types": types})
+
 @main.route("/connection/create", methods=["POST"])
 def create_connection():
     data = request.get_json()
