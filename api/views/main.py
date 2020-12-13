@@ -162,9 +162,9 @@ def get_postgres():
 
 @main.route("/connections/types", methods=["GET"])
 def get_connection_types():
-    types = []
-    for connection in Connection.query.distinct(Connection.type):
-        types.append(connection.type)
+    types = ["postgres"]
+    # for connection in Connection.query.distinct(Connection.type):
+    #     types.append(connection.type)
     return create_response(message="Type retrieval was a total success!", data={"connection types": types})
 
 @main.route("/connection/create", methods=["POST"])
