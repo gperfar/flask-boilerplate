@@ -203,7 +203,7 @@ def create_connection():
         return create_response(status=422, message=msg)
     # create SQLAlchemy Object
     if data["type"] == "postgres":
-        new_postgres = Postgres(name=data["name"], host = data["host"], database = data["database"], username = data["username"], password = data["password"], user = data["user_id"], comment = data["comment"])
+        new_postgres = Postgres(name=data["name"], host = data["host"], database = data["database"], username = data["username"], password = data["password"], user_id = data["user_id"], comment = data["comment"])
     # commit it to database
     db.session.add(new_postgres)
     db.session.commit()
