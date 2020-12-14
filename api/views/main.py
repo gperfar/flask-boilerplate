@@ -167,6 +167,7 @@ def get_connection_types():
     #     types.append(connection.type)
     return create_response(message="Type retrieval was a total success!", data={"connection types": types})
 
+#Create
 @main.route("/connection/create", methods=["POST"])
 def create_connection():
     data = request.get_json()
@@ -210,6 +211,51 @@ def create_connection():
     return create_response(
         message=f"Successfully created connection {new_postgres.name} with id: {new_postgres.id}"
     )
+
+#Test
+@main.route("/connection/test", methods=["POST"])
+def test_connection():
+    data = request.get_json()
+    logger.info("Data recieved: %s", data)
+    if "name" not in data:
+        msg = "No name provided for connection."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
+    if "host" not in data:
+        msg = "No host provided for connection."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
+    if "database" not in data:
+        msg = "No database provided for connection."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
+    if "username" not in data:
+        msg = "No username provided for connection."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
+    if "password" not in data:
+        msg = "No password provided for connection."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
+    if "user_id" not in data:
+        msg = "No user_id provided for connection."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
+    if "comment" not in data:
+        data["comment"] = ""
+    if ("type" not in data):
+        msg = "No type provided for connection."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
+    # create SQLAlchemy Object
+    if data["type"] == "postgres":
+        new_postgres = Postgres(name=data["name"], host = data["host"], database = data["database"], username = data["username"], password = data["password"], user_id = data["user_id"], comment = data["comment"])
+        try:
+            new_postgres.start_connection()
+            return create_response(message=f"Test OK!")
+        except:
+            return create_response(status=422, message="FAILED")
+
 
 @main.route("/connection/edit", methods=["POST"])
 def edit_connection():
