@@ -44,9 +44,13 @@ def runquery_get():
     if (not(sentence_id)):
         msg = "Missing sentence_id" 
         return create_response(status=422, message=msg)
-    sentence = Sentence.query.get(sentence_id)
-    results_json = sentence.execute()
-    return json.dumps({'connection name': sentence.connection.name,'sentence': sentence.sql_query,'results': results_json})
+    try:
+        sentence = Sentence.query.get(sentence_id)
+        results_json = sentence.execute()
+        return json.dumps({'connection name': sentence.connection.name,'sentence': sentence.sql_query,'results': results_json})
+    except(Exception) as error:
+        create_response(status=500,message= error)
+
 
 @main.route('/runquery', methods=['POST']) 
 def runquery_post():
@@ -62,8 +66,11 @@ def runquery_post():
         return create_response(status=422, message=msg)
     sentence = Sentence.query.get(data["sentence_id"])
     if sentence.connection.user_id == data["user_id"]:
-        results_json = sentence.execute()
-        return json.dumps({'connection name': sentence.connection.name,'sentence': sentence.sql_query,'results': results_json})
+        try:
+            results_json = sentence.execute()
+            return json.dumps({'connection name': sentence.connection.name,'sentence': sentence.sql_query,'results': results_json})
+        except(Exception) as error:
+            create_response(status=500,message= error)
     msg = "Sentence is not able to execute: user does not have access."
     logger.info(msg)
     return create_response(status=422, message=msg)
