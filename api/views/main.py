@@ -104,16 +104,29 @@ def init_data():
     #Sentences
     sentence1 = Sentence(name="Sentence 1", sql_query="SELECT * FROM people WHERE kingdom = 'Rohan'", connection_id = 1, comment = "Keeping tabs on the Rohirrim")
     sentence2 = Sentence(name="Sentence 2", sql_query="SELECT * FROM Customers", connection_id = 3, comment = "Keeping tabs on Customers") 
+    sentence3 = Sentence(name="Sentence 3 - using GROUP", sql_query="SELECT city, COUNT(*) AS customers FROM Customers GROUP BY city", connection_id = 3, comment = "Customers we have in each city") 
     db.session.add(sentence1)
     db.session.add(sentence2)
-    db.session.commit()
+    db.session.add(sentence3)
+    # db.session.commit()
     #Visualizations
-    visual1 = VisualizationLineChart(name="Line Chart 1 - black", sentence_id = 2, comment = "Based on the real Sentence on the real Connection - 1", color = "black")
-    visual2 = VisualizationLineChart(name="Line Chart 2 - grey", sentence_id = 2, comment = "Based on the real Sentence on the real Connection - 2", color = "grey")
+    visual1 = VisualizationLineChart(
+        name="Line Chart 1 - black", 
+        sentence_id = 3, 
+        comment = "Based on the real Sentence on the real Connection - 1", 
+        color = "black", 
+        params= {
+            'columns':['city','customers'], 
+            'xaxis_label':'City', 
+            'yaxis_label':'Number of Customers',
+            'legend':0
+        }
+    )
+    visual2 = VisualizationLineChart(name="Line Chart 2 - grey", sentence_id = 2, comment = "Based on the real Sentence on the real Connection - 2", color = "grey", params={'columns':['customer_id','address','city']})
     db.session.add(visual1)
     db.session.add(visual2)
-    db.session.commit()
-    #Visualizations
+    # db.session.commit()
+    #Dashboards
     dash1 = Dashboard(name="Dashboard 1", comment = "No comment - 1")
     dash1.visualizations.append(visual1)
     dash2 = Dashboard(name="Dashboard 2", comment = "Dashboard with no comment - 2")
@@ -485,8 +498,8 @@ def return_visualizations():
         Visualization.id == data["visualization_id"],
         Connection.user_id == data["user_id"]
         ).first()
-    visualization_details = visualization.__dict__
-    visualization_details.pop('_sa_instance_state', None)
+    visualization_details = visualization.get_fields()
+    # visualization_details.pop('_sa_instance_state', None)
     return create_response(data={"visualization": visualization_details})
 
 # Create
@@ -514,7 +527,7 @@ def create_visualization():
             name = data["name"], 
             sentence = data["sentence_id"], 
             comment = data["comment"],
-            color = data["color"]) ##TESTTTTT
+            params = data["params"]) ##TESTTTTT
     # commit it to database
     db.session.add(new_visualization)
     db.session.commit()
@@ -543,15 +556,15 @@ def edit_visualization():
         data["comment"] = ""
     # create SQLAlchemy Object
     if data["type"] == "linechart":
-        if "color" not in data:
-            msg = "No color provided for line chart visualization."
+        if "params" not in data:
+            msg = "No params provided for line chart visualization."
             logger.info(msg)
             return create_response(status=422, message=msg)
         visual = VisualizationLineChart.query.get(data["visualization_id"])
         visual.name = data["name"]
         visual.sentence_id = data["sentence_id"]
         visual.comment = data["comment"]
-        visual.color = data["color"]
+        visual.params = data["params"]
         # commit it to database
         db.session.commit()
         return create_response(
@@ -575,6 +588,21 @@ def delete_visualization():
         message=f"Successfully deleted visual."
     )
 
+# Prepare Render
+@main.route("/visualization/pre_render", methods=["POST"])
+def pre_render_visualization():
+    data = request.get_json()
+    logger.info("Data recieved: %s", data)
+    if "visualization_id" not in data:
+        msg = "No ID provided for visualization."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
+    # Fetch Sentence
+    visualization = db.session.query(Visualization).filter(Visualization.id == data["visualization_id"]).first()
+    # Commit it to database
+    results = visualization.pre_render()
+    # return results
+    return create_response(message=f"You were able to render the visualization!", data=results)
 ############ Dashboards ###############
 # Return
 @main.route("/dashboards", methods=["GET"])
