@@ -23,7 +23,7 @@ To rebuild the DB in prod:
 heroku login (and log in)
 heroku run bash -a gperfar-utn
 Once there, python manage.py recreate_db
-
+To quit Heroku CLI, exit
 
 # Flask Boilerplate [![CircleCI](https://circleci.com/gh/tko22/flask-boilerplate/tree/master.svg?style=svg&circle-token=:circle-token)](https://circleci.com/gh/tko22/flask-boilerplate/tree/master) <a href="https://github.com/ambv/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
 

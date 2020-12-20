@@ -603,6 +603,7 @@ def pre_render_visualization():
     results = visualization.pre_render()
     # return results
     return create_response(message=f"You were able to render the visualization!", data=results)
+    
 ############ Dashboards ###############
 # Return
 @main.route("/dashboards", methods=["GET"])

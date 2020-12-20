@@ -73,13 +73,6 @@ class VisualizationLineChart(Visualization):
 
         sentence = Sentence.query.get(self.sentence_id)
         results = sentence.execute()
-        # X-axis
-        # xaxis_name=self.params['columns'][0]
-        # xaxis=[]
-        # for row in results:
-        #     xaxis.append(row[xaxis_name])
-        # return json.dumps(xaxis)
-        # Lines
         headers=[]
         columns=[]
         for idx, column in enumerate(self.params['columns']):
@@ -94,7 +87,8 @@ class VisualizationLineChart(Visualization):
             'lines': columns[1:],
             'xaxis_label': self.params['xaxis_label'],
             'yaxis_label': self.params['yaxis_label'],
-            'yaxis2_label': self.params['yaxis2_label'] if 'yaxis2_label' in self.params else ''
+            'yaxis2_label': self.params['yaxis2_label'] if 'yaxis2_label' in self.params else '',
+            'results':results
             }
         
 
