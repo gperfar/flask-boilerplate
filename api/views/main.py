@@ -114,15 +114,22 @@ def init_data():
         name="Line Chart 1 - black", 
         sentence_id = 3, 
         comment = "Based on the real Sentence on the real Connection - 1", 
-        color = "black", 
         params= {
-            'columns':['city','customers'], 
+            'columns':[
+                {'name': 'city'},
+                {'name': 'customers', 'color': '#FF0000'}
+                ], 
             'xaxis_label':'City', 
             'yaxis_label':'Number of Customers',
-            'legend':0
+            'legend':True
         }
     )
-    visual2 = VisualizationLineChart(name="Line Chart 2 - grey", sentence_id = 2, comment = "Based on the real Sentence on the real Connection - 2", color = "grey", params={'columns':['customer_id','address','city']})
+    visual2 = VisualizationLineChart(
+        name="Line Chart 2 - grey", 
+        sentence_id = 2, 
+        comment = "Based on the real Sentence on the real Connection - 2", 
+        # color = "grey", 
+        params={'columns':['customer_id','address','city']})
     db.session.add(visual1)
     db.session.add(visual2)
     # db.session.commit()

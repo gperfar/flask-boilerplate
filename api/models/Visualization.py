@@ -52,10 +52,8 @@ class VisualizationLineChart(Visualization):
     }
 
 
-    def __init__(self, name:str, sentence_id:int, comment:str, color:str, params:json):
+    def __init__(self, name:str, sentence_id:int, comment:str, params:json):
         super().__init__(name=name,sentence_id= sentence_id,comment= comment, type = "linechart", params = params)
-        # self.color = color
-        # self.params = params
 
     def __repr__(self):
         return f"<Line Chart {self.name}>"
@@ -73,24 +71,18 @@ class VisualizationLineChart(Visualization):
 
         sentence = Sentence.query.get(self.sentence_id)
         results = sentence.execute()
-        headers=[]
-        columns=[]
-        for idx, column in enumerate(self.params['columns']):
-            headers.append(self.params['columns'][idx])
-            temp_list = []
-            for row in results:
-                temp_list.append(row[headers[idx]])
-            columns.append(temp_list)
+        # headers=[]
+        # # columns=[]
+        # for idx, column in enumerate(self.params['columns']):
+        #     headers.append(self.params['columns'][idx])
+            # temp_list = []
+            # for row in results:
+            #     temp_list.append(row[headers[idx]])
+            # columns.append(temp_list)
         return {
-            'headers':headers,
-            'xaxis': columns[0],
-            'lines': columns[1:],
+            'column_data': self.params['columns'],
             'xaxis_label': self.params['xaxis_label'],
             'yaxis_label': self.params['yaxis_label'],
             'yaxis2_label': self.params['yaxis2_label'] if 'yaxis2_label' in self.params else '',
             'results':results
             }
-        
-
-
-        return json.dumps({'a':json_result})
