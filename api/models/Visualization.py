@@ -31,21 +31,16 @@ class Visualization(Mixin, db.Model):
 
     def get_fields(self):
         raw_dict = self.__dict__
-        # if(self.type == "linechart"):
-            # return self.params['columns']
-            # a = self.color
-            # raw_dict = self.__dict__
         raw_dict.pop('_sa_instance_state', None) 
         return raw_dict
     
-    def render(self):
+    def pre_render(self):
         return "You shouldn't see this."
 
 class VisualizationLineChart(Visualization):
     __tablename__ = "visualizationlinechart"
 
     id = db.Column(db.Integer, db.ForeignKey("visualization.id", ondelete="CASCADE"), primary_key=True)
-    # color = db.Column(db.String, nullable=False)
 
     __mapper_args__ = {
         'polymorphic_identity':'linechart',
@@ -59,27 +54,10 @@ class VisualizationLineChart(Visualization):
         return f"<Line Chart {self.name}>"
     
     def pre_render(self):
-        #----------------------------------------------------------
-        # Structure:                                              |
-        # Column 1: X-Axis                                        |
-        # Columns 2-N: Lines 1 to (N-1)                           |
-        # xaxis_label: Label in X-Axis                            |
-        # yaxis_label: Label in Y-Axis                            |
-        # yaxis2_label: Label in secondary Y-Axis                 |
-        # legend: Boolean. Whether or not to show legend          |
-        #----------------------------------------------------------
-
         sentence = Sentence.query.get(self.sentence_id)
         results = sentence.execute()
-        # headers=[]
-        # # columns=[]
-        # for idx, column in enumerate(self.params['columns']):
-        #     headers.append(self.params['columns'][idx])
-            # temp_list = []
-            # for row in results:
-            #     temp_list.append(row[headers[idx]])
-            # columns.append(temp_list)
         return {
+            'type': self.type,
             'column_data': self.params['columns'],
             'xaxis_label': self.params['xaxis_label'],
             'yaxis_label': self.params['yaxis_label'],
