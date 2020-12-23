@@ -486,6 +486,13 @@ def get_visualizations():
     visualizations = Visualization.query.all()
     return create_response(data={"visualizations": serialize_list(visualizations)})
 
+@main.route("/visualizations/types", methods=["GET"])
+def get_connection_types():
+    types = ["linechart"]
+    # for connection in Connection.query.distinct(Connection.type):
+    #     types.append(connection.type)
+    return create_response(message="Type retrieval was a total success!", data={"visualization types": types})
+
 # Return (with user ID)
 @main.route("/visualizations", methods=["POST"])
 def return_visualizations():
@@ -501,6 +508,7 @@ def return_visualizations():
             ).all()
         # return visualizations 
         return create_response(data={"visualizations": serialize_list(visualizations)})
+    # If there was a specific visualization requested, fetch it and return it
     visualization = db.session.query(Visualization).join(Sentence).join(Connection).filter(
         Visualization.id == data["visualization_id"],
         Connection.user_id == data["user_id"]
