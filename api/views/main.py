@@ -487,7 +487,7 @@ def get_visualizations():
     return create_response(data={"visualizations": serialize_list(visualizations)})
 
 @main.route("/visualizations/types", methods=["GET"])
-def get_connection_types():
+def get_visualization_types():
     types = ["linechart"]
     # for connection in Connection.query.distinct(Connection.type):
     #     types.append(connection.type)
