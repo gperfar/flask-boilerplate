@@ -534,13 +534,13 @@ def create_visualization():
         data["comment"] = ""
     # create SQLAlchemy Object
     if data["type"] == "linechart":
-        if data["color"] not in data:
-            msg = "No color provided for line chart visualization."
-            logger.info(msg)
-            return create_response(status=422, message=msg)
+        # if data["color"] not in data:
+        #     msg = "No color provided for line chart visualization."
+        #     logger.info(msg)
+        #     return create_response(status=422, message=msg)
         new_visualization = VisualizationLineChart(
             name = data["name"], 
-            sentence = data["sentence_id"], 
+            sentence_id = data["sentence_id"], 
             comment = data["comment"],
             params = data["params"]) ##TESTTTTT
     # commit it to database
