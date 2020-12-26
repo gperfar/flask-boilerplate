@@ -104,7 +104,7 @@ def init_data():
     #Sentences
     sentence1 = Sentence(name="Sentence 1", sql_query="SELECT * FROM people WHERE kingdom = 'Rohan'", connection_id = 1, comment = "Keeping tabs on the Rohirrim")
     sentence2 = Sentence(name="Sentence 2", sql_query="SELECT * FROM Customers", connection_id = 3, comment = "Keeping tabs on Customers") 
-    sentence3 = Sentence(name="Sentence 3 - using GROUP", sql_query="SELECT city, COUNT(*) AS customers FROM Customers GROUP BY city", connection_id = 3, comment = "Customers we have in each city") 
+    sentence3 = Sentence(name="Sentence 3 - using GROUP", sql_query="SELECT city, COUNT(*) AS customers, (COUNT(*)*1.0/2)::float AS customershalf FROM Customers GROUP BY city", connection_id = 3, comment = "Customers we have in each city") 
     db.session.add(sentence1)
     db.session.add(sentence2)
     db.session.add(sentence3)
@@ -117,7 +117,7 @@ def init_data():
         params= {
             'columns':[
                 {'name': 'city'},
-                {'name': 'customers', 'color': '#FF0000'}
+                {'name': 'customers', 'color': '#FF0000', 'legend': 'Customers'}
                 ], 
             'xaxis_label':'City', 
             'yaxis_label':'Number of Customers',
