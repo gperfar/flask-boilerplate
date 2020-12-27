@@ -488,7 +488,7 @@ def get_visualizations():
 
 @main.route("/visualizations/types", methods=["GET"])
 def get_visualization_types():
-    types = ["linechart"]
+    types = ["linechart", "barchart"]
     # for connection in Connection.query.distinct(Connection.type):
     #     types.append(connection.type)
     return create_response(message="Type retrieval was a total success!", data={"visualization types": types})
