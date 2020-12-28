@@ -65,7 +65,7 @@ class VisualizationLineChart(Visualization):
 
 
 
-    class VisualizationBarChart(Visualization):
+class VisualizationBarChart(Visualization):
     __tablename__ = "visualizationbarchart"
     id = db.Column(db.Integer, db.ForeignKey("visualization.id", ondelete="CASCADE"), primary_key=True)
 
