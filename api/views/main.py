@@ -5,7 +5,7 @@ from sqlalchemy import inspect, func
 import psycopg2, json
 
 main = Blueprint("main", __name__)  # initialize blueprint
-visualization_types=["Line chart", "Bar chart"]
+visualization_types=["Line chart", "Bar chart", "Area chart"]
 
 # function that is called when you visit /
 @main.route("/")
@@ -126,11 +126,19 @@ def init_data():
         }
     )
     visual2 = VisualizationLineChart(
-        name="Line Chart 2 - grey", 
-        sentence_id = 2, 
-        comment = "Based on the real Sentence on the real Connection - 2", 
-        # color = "grey", 
-        params={'columns':['customer_id','address','city']})
+        name="Bars, Bars, Bars!", 
+        sentence_id = 3, 
+        comment = "Based on the real Sentence on the real Connection", 
+        params= {
+            'columns':[
+                {'name': 'city'},
+                {'name': 'customers', 'color': 'MidnightBlue', 'legend': 'Active'}
+                ], 
+            'xaxis_label':'City', 
+            'yaxis_label':'Number of Customers',
+            'legend':True
+        }
+    )
     db.session.add(visual1)
     db.session.add(visual2)
     # db.session.commit()
