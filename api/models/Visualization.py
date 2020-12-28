@@ -94,7 +94,7 @@ class VisualizationBarChart(Visualization):
 
 
 class VisualizationAreaChart(Visualization):
-    __tablename__ = "visualizationbarchart"
+    __tablename__ = "visualizationareachart"
     id = db.Column(db.Integer, db.ForeignKey("visualization.id", ondelete="CASCADE"), primary_key=True)
 
     __mapper_args__ = {
