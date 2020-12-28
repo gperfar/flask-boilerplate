@@ -539,7 +539,7 @@ def create_visualization():
             name = data["name"], 
             sentence_id = data["sentence_id"], 
             comment = data["comment"],
-            params = data["params"]) ##TESTTTTT
+            params = data["params"])
     if data["type"] == "Bar chart":
         new_visualization = VisualizationBarChart(
             name = data["name"], 
@@ -582,6 +582,7 @@ def edit_visualization():
     visual.sentence_id = data["sentence_id"]
     visual.comment = data["comment"]
     visual.params = data["params"]
+    visual.type = data["type"]
     # commit it to database
     db.session.commit()
     return create_response(
