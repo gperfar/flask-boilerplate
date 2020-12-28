@@ -5,7 +5,7 @@ from sqlalchemy import inspect, func
 import psycopg2, json
 
 main = Blueprint("main", __name__)  # initialize blueprint
-visualization_types=["Line chart", "Bar chart", "Area chart"]
+visualization_types=["Area chart", "Bar chart", "Line chart", "Area/Bar/Chart chart","Radar chart", "Pie chart", "Radial bar chart", "Scatter chart"]
 
 # function that is called when you visit /
 @main.route("/")
