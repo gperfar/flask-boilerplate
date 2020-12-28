@@ -42,7 +42,7 @@ class VisualizationLineChart(Visualization):
     id = db.Column(db.Integer, db.ForeignKey("visualization.id", ondelete="CASCADE"), primary_key=True)
 
     __mapper_args__ = {
-        'polymorphic_identity':'linechart',
+        'polymorphic_identity':'Line chart',
     }
     def __init__(self, name:str, sentence_id:int, comment:str, params:json):
         super().__init__(name=name,sentence_id= sentence_id,comment= comment, type = "Line chart", params = params)
@@ -70,7 +70,7 @@ class VisualizationBarChart(Visualization):
     id = db.Column(db.Integer, db.ForeignKey("visualization.id", ondelete="CASCADE"), primary_key=True)
 
     __mapper_args__ = {
-        'polymorphic_identity':'barchart',
+        'polymorphic_identity':'Bar chart',
     }
     def __init__(self, name:str, sentence_id:int, comment:str, params:json):
         super().__init__(name=name,sentence_id= sentence_id,comment= comment, type = "Bar chart", params = params)
