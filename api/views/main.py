@@ -1,11 +1,13 @@
 from flask import Blueprint, request
-from api.models import db, User, Sentence, Connection, Postgres, Visualization, VisualizationLineChart, Dashboard
+from api.models import db, User, Sentence, Connection, Postgres, Visualization, Dashboard#, VisualizationLineChart
 from api.core import create_response, serialize_list, logger
 from sqlalchemy import inspect, func
 import psycopg2, json
 
 main = Blueprint("main", __name__)  # initialize blueprint
-visualization_types=["Area chart", "Bar chart", "Line chart", "Area/Bar/Chart chart","Radar chart", "Pie chart", "Radial bar chart", "Scatter chart"]
+
+visualization_types=["Area chart", "Bar chart", "Line chart", "Area/Bar/Line chart","Radar chart", "Pie chart", "Radial bar chart", "Scatter chart"]
+connection_types=["postgres"]
 
 # function that is called when you visit /
 @main.route("/")
@@ -94,12 +96,12 @@ def init_data():
     db.session.commit()
     #Connections
     dummyconnections =[]
-    postgres1 = Postgres(name="Aragorn's Connection 1", host="AragornStrider.gondor.com", database="Gondor", username = "userr", password = "password", comment = "",user_id = user_id)
-    postgres2 = Postgres(name="Aragorn's Connection 2", host="AragornStrider2.gondor.com", database="Gondor2", username = "userr2", password = "password2",comment = "", user_id = user_id)
-    postgres3 = Postgres(name = "Real Connection", host = "drona.db.elephantsql.com", database = "uvqhwsnn", username = "uvqhwsnn", password = "mzwjhs6qcqZHTm-ecCXJkQ3FoLViB9RT", comment = "Conexión real! Base Northwind", user_id = user_id)
+    postgres1 = Postgres(name="Aragorn's Connection 1", host="AragornStrider.gondor.com", database="Gondor", username = "userr", password = "password", port = 5432, comment = "",user_id = user_id)
+    # postgres2 = Postgres(name="Aragorn's Connection 2", host="AragornStrider2.gondor.com", database="Gondor2", username = "userr2", password = "password2",comment = "", user_id = user_id)
+    postgres2 = Postgres(name = "Real Connection", host = "drona.db.elephantsql.com", database = "uvqhwsnn", username = "uvqhwsnn", password = "mzwjhs6qcqZHTm-ecCXJkQ3FoLViB9RT", port = 5432, comment = "Conexión real! Base Northwind", user_id = user_id)
     dummyconnections.append(postgres1)
     dummyconnections.append(postgres2)
-    dummyconnections.append(postgres3)
+    # dummyconnections.append(postgres3)
     db.session.add_all(dummyconnections)
     db.session.commit()
     #Sentences
@@ -111,9 +113,10 @@ def init_data():
     db.session.add(sentence3)
     # db.session.commit()
     #Visualizations
-    visual1 = VisualizationLineChart(
+    visual1 = Visualization(
         name="Line Chart 1 - black", 
         sentence_id = 3, 
+        type = "Line chart",
         comment = "Based on the real Sentence on the real Connection - 1", 
         params= {
             'columns':[
@@ -125,8 +128,9 @@ def init_data():
             'legend':True
         }
     )
-    visual2 = VisualizationBarChart(
+    visual2 = Visualization(
         name="Bars, Bars, Bars!", 
+        type="Bar chart",
         sentence_id = 3, 
         comment = "Based on the real Sentence on the real Connection", 
         params= {
@@ -198,7 +202,7 @@ def get_postgres():
 
 @main.route("/connections/types", methods=["GET"])
 def get_connection_types():
-    types = ["postgres"]
+    types = connection_types
     # for connection in Connection.query.distinct(Connection.type):
     #     types.append(connection.type)
     return create_response(message="Type retrieval was a total success!", data={"connection types": types})
@@ -497,9 +501,7 @@ def get_visualizations():
 
 @main.route("/visualizations/types", methods=["GET"])
 def get_visualization_types():
-    types = visualization_types
-    # for connection in Connection.query.distinct(Connection.type):
-    #     types.append(connection.type)
+    types = visualization_types #It's at the top
     return create_response(message="Type retrieval was a total success!", data={"visualization types": types})
 
 # Return (with user ID)
@@ -539,27 +541,32 @@ def create_visualization():
         msg = "No sentence ID provided for visualization."
         logger.info(msg)
         return create_response(status=422, message=msg)
+    if "type" not in data:
+        msg = "No type provided for visualization."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
     if "comment" not in data:
         data["comment"] = ""
     # create SQLAlchemy Object
-    if data["type"] == "Line chart":
-        new_visualization = VisualizationLineChart(
-            name = data["name"], 
-            sentence_id = data["sentence_id"], 
-            comment = data["comment"],
-            params = data["params"])
-    if data["type"] == "Bar chart":
-        new_visualization = VisualizationBarChart(
-            name = data["name"], 
-            sentence_id = data["sentence_id"], 
-            comment = data["comment"],
-            params = data["params"])
-    if data["type"] == "Area chart":
-        new_visualization = VisualizationAreaChart(
-            name = data["name"], 
-            sentence_id = data["sentence_id"], 
-            comment = data["comment"],
-            params = data["params"])
+    new_visualization = Visualization(
+        name = data["name"], 
+        sentence_id = data["sentence_id"], 
+        comment = data["comment"],
+        params = data["params"],
+        type = data["type"]
+    )
+    # if data["type"] == "Bar chart":
+    #     new_visualization = VisualizationBarChart(
+    #         name = data["name"], 
+    #         sentence_id = data["sentence_id"], 
+    #         comment = data["comment"],
+    #         params = data["params"])
+    # if data["type"] == "Area chart":
+    #     new_visualization = VisualizationAreaChart(
+    #         name = data["name"], 
+    #         sentence_id = data["sentence_id"], 
+    #         comment = data["comment"],
+    #         params = data["params"])
     # commit it to database
     db.session.add(new_visualization)
     db.session.commit()

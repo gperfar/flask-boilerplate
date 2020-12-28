@@ -13,7 +13,7 @@ class Connection(Mixin, db.Model):
     type = db.Column(db.String, nullable=False)
     sentences = db.relationship('Sentence', backref='connection', lazy=True,cascade="all, delete-orphan")
 
-    def __init__(self, name: str, comment:str, user_id:int, type:str):
+    def __init__(self, name: str, comment:str, user_id:str, type:str):
         self.name = name
         self.comment = comment
         self.user_id = user_id
@@ -46,13 +46,15 @@ class Postgres(Connection):
     database = db.Column(db.String, nullable=False)
     username = db.Column(db.String, nullable=False)
     password = db.Column(db.String, nullable=False)
+    port = db.Column(db.Integer, nullable=False)
 
-    def __init__(self, name: str, host:str, database:str, username:str, password:str, comment:str, user_id:int):
+    def __init__(self, name: str, host:str, database:str, username:str, password:str, comment:str, user_id:str, port:int):
         super().__init__(name=name,user_id= user_id,comment= comment, type = "postgres")
         self.host = host
         self.database = database
         self.username = username
         self.password = password
+        self.port = port
 
     def __repr__(self):
         return f"<Connection {self.name}>"
@@ -64,5 +66,6 @@ class Postgres(Connection):
             host = self.host,
             database = self.database, 
             user = self.username, 
-            password = self.password)
+            password = self.password,
+            port=self.port)
         return conn

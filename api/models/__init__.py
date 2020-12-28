@@ -4,7 +4,7 @@
 from .Sentence import Sentence
 from .User import User
 from .Connection import Connection, Postgres
-from .Visualization import Visualization, VisualizationLineChart
+from .Visualization import Visualization#, VisualizationLineChart
 from .Dashboard import Dashboard
 from .base import db
 

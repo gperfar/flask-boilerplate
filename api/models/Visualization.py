@@ -35,85 +35,97 @@ class Visualization(Mixin, db.Model):
         return raw_dict
     
     def pre_render(self):
+        if self.type in ['Area chart', 'Bar chart', 'Line chart', 'Area/Bar/Line chart']:
+            sentence = Sentence.query.get(self.sentence_id)
+            results = sentence.execute()
+            return {
+                'type': self.type,
+                'column_data': self.params['columns'],
+                'xaxis_label': self.params['xaxis_label'],
+                'yaxis_label': self.params['yaxis_label'],
+                'yaxis2_label': self.params['yaxis2_label'] if 'yaxis2_label' in self.params else '',
+                'results':results
+                }
         return "You shouldn't see this."
 
-class VisualizationLineChart(Visualization):
-    __tablename__ = "visualizationlinechart"
-    id = db.Column(db.Integer, db.ForeignKey("visualization.id", ondelete="CASCADE"), primary_key=True)
 
-    __mapper_args__ = {
-        'polymorphic_identity':'Line chart',
-    }
-    def __init__(self, name:str, sentence_id:int, comment:str, params:json):
-        super().__init__(name=name,sentence_id= sentence_id,comment= comment, type = "Line chart", params = params)
+# class VisualizationLineChart(Visualization):
+#     __tablename__ = "visualizationlinechart"
+#     id = db.Column(db.Integer, db.ForeignKey("visualization.id", ondelete="CASCADE"), primary_key=True)
 
-    def __repr__(self):
-        return f"<Line Chart {self.name}>"
+#     __mapper_args__ = {
+#         'polymorphic_identity':'Line chart',
+#     }
+#     def __init__(self, name:str, sentence_id:int, comment:str, params:json):
+#         super().__init__(name=name,sentence_id= sentence_id,comment= comment, type = "Line chart", params = params)
+
+#     def __repr__(self):
+#         return f"<Line Chart {self.name}>"
     
-    def pre_render(self):
-        sentence = Sentence.query.get(self.sentence_id)
-        results = sentence.execute()
-        return {
-            'type': self.type,
-            'column_data': self.params['columns'],
-            'xaxis_label': self.params['xaxis_label'],
-            'yaxis_label': self.params['yaxis_label'],
-            'yaxis2_label': self.params['yaxis2_label'] if 'yaxis2_label' in self.params else '',
-            'results':results
-            }
+#     def pre_render(self):
+#         sentence = Sentence.query.get(self.sentence_id)
+#         results = sentence.execute()
+#         return {
+#             'type': self.type,
+#             'column_data': self.params['columns'],
+#             'xaxis_label': self.params['xaxis_label'],
+#             'yaxis_label': self.params['yaxis_label'],
+#             'yaxis2_label': self.params['yaxis2_label'] if 'yaxis2_label' in self.params else '',
+#             'results':results
+#             }
 
 
 
 
-class VisualizationBarChart(Visualization):
-    __tablename__ = "visualizationbarchart"
-    id = db.Column(db.Integer, db.ForeignKey("visualization.id", ondelete="CASCADE"), primary_key=True)
+# class VisualizationBarChart(Visualization):
+#     __tablename__ = "visualizationbarchart"
+#     id = db.Column(db.Integer, db.ForeignKey("visualization.id", ondelete="CASCADE"), primary_key=True)
 
-    __mapper_args__ = {
-        'polymorphic_identity':'Bar chart',
-    }
-    def __init__(self, name:str, sentence_id:int, comment:str, params:json):
-        super().__init__(name=name,sentence_id= sentence_id,comment= comment, type = "Bar chart", params = params)
+#     __mapper_args__ = {
+#         'polymorphic_identity':'Bar chart',
+#     }
+#     def __init__(self, name:str, sentence_id:int, comment:str, params:json):
+#         super().__init__(name=name,sentence_id= sentence_id,comment= comment, type = "Bar chart", params = params)
 
-    def __repr__(self):
-        return f"<Bar Chart {self.name}>"
+#     def __repr__(self):
+#         return f"<Bar Chart {self.name}>"
     
-    def pre_render(self):
-        sentence = Sentence.query.get(self.sentence_id)
-        results = sentence.execute()
-        return {
-            'type': self.type,
-            'column_data': self.params['columns'],
-            'xaxis_label': self.params['xaxis_label'],
-            'yaxis_label': self.params['yaxis_label'],
-            'yaxis2_label': self.params['yaxis2_label'] if 'yaxis2_label' in self.params else '',
-            'results':results
-            }
+#     def pre_render(self):
+#         sentence = Sentence.query.get(self.sentence_id)
+#         results = sentence.execute()
+#         return {
+#             'type': self.type,
+#             'column_data': self.params['columns'],
+#             'xaxis_label': self.params['xaxis_label'],
+#             'yaxis_label': self.params['yaxis_label'],
+#             'yaxis2_label': self.params['yaxis2_label'] if 'yaxis2_label' in self.params else '',
+#             'results':results
+#             }
 
 
 
 
-class VisualizationAreaChart(Visualization):
-    __tablename__ = "visualizationareachart"
-    id = db.Column(db.Integer, db.ForeignKey("visualization.id", ondelete="CASCADE"), primary_key=True)
+# class VisualizationAreaChart(Visualization):
+#     __tablename__ = "visualizationareachart"
+#     id = db.Column(db.Integer, db.ForeignKey("visualization.id", ondelete="CASCADE"), primary_key=True)
 
-    __mapper_args__ = {
-        'polymorphic_identity':'Area chart',
-    }
-    def __init__(self, name:str, sentence_id:int, comment:str, params:json):
-        super().__init__(name=name,sentence_id= sentence_id,comment= comment, type = "Area chart", params = params)
+#     __mapper_args__ = {
+#         'polymorphic_identity':'Area chart',
+#     }
+#     def __init__(self, name:str, sentence_id:int, comment:str, params:json):
+#         super().__init__(name=name,sentence_id= sentence_id,comment= comment, type = "Area chart", params = params)
 
-    def __repr__(self):
-        return f"<Area Chart {self.name}>"
+#     def __repr__(self):
+#         return f"<Area Chart {self.name}>"
     
-    def pre_render(self):
-        sentence = Sentence.query.get(self.sentence_id)
-        results = sentence.execute()
-        return {
-            'type': self.type,
-            'column_data': self.params['columns'],
-            'xaxis_label': self.params['xaxis_label'],
-            'yaxis_label': self.params['yaxis_label'],
-            'yaxis2_label': self.params['yaxis2_label'] if 'yaxis2_label' in self.params else '',
-            'results':results
-            }
+#     def pre_render(self):
+#         sentence = Sentence.query.get(self.sentence_id)
+#         results = sentence.execute()
+#         return {
+#             'type': self.type,
+#             'column_data': self.params['columns'],
+#             'xaxis_label': self.params['xaxis_label'],
+#             'yaxis_label': self.params['yaxis_label'],
+#             'yaxis2_label': self.params['yaxis2_label'] if 'yaxis2_label' in self.params else '',
+#             'results':results
+#             }
