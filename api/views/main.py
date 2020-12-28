@@ -5,6 +5,7 @@ from sqlalchemy import inspect, func
 import psycopg2, json
 
 main = Blueprint("main", __name__)  # initialize blueprint
+visualization_types=["Line chart", "Bar chart"]
 
 # function that is called when you visit /
 @main.route("/")
@@ -488,7 +489,7 @@ def get_visualizations():
 
 @main.route("/visualizations/types", methods=["GET"])
 def get_visualization_types():
-    types = ["linechart", "barchart"]
+    types = visualization_types
     # for connection in Connection.query.distinct(Connection.type):
     #     types.append(connection.type)
     return create_response(message="Type retrieval was a total success!", data={"visualization types": types})
@@ -533,16 +534,18 @@ def create_visualization():
     if "comment" not in data:
         data["comment"] = ""
     # create SQLAlchemy Object
-    if data["type"] == "linechart":
-        # if data["color"] not in data:
-        #     msg = "No color provided for line chart visualization."
-        #     logger.info(msg)
-        #     return create_response(status=422, message=msg)
+    if data["type"] == "Line chart":
         new_visualization = VisualizationLineChart(
             name = data["name"], 
             sentence_id = data["sentence_id"], 
             comment = data["comment"],
             params = data["params"]) ##TESTTTTT
+    if data["type"] == "Bar chart":
+        new_visualization = VisualizationBarChart(
+            name = data["name"], 
+            sentence_id = data["sentence_id"], 
+            comment = data["comment"],
+            params = data["params"])
     # commit it to database
     db.session.add(new_visualization)
     db.session.commit()
@@ -570,21 +573,20 @@ def edit_visualization():
     if "comment" not in data:
         data["comment"] = ""
     # create SQLAlchemy Object
-    if data["type"] == "linechart":
-        if "params" not in data:
-            msg = "No params provided for line chart visualization."
-            logger.info(msg)
-            return create_response(status=422, message=msg)
-        visual = VisualizationLineChart.query.get(data["visualization_id"])
-        visual.name = data["name"]
-        visual.sentence_id = data["sentence_id"]
-        visual.comment = data["comment"]
-        visual.params = data["params"]
-        # commit it to database
-        db.session.commit()
-        return create_response(
-            message=f"Successfully edited visualization {visual.name} with id: {visual.id}"
-        )
+    if "params" not in data:
+        msg = "No params provided for line chart visualization."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
+    visual = Visualization.query.get(data["visualization_id"])
+    visual.name = data["name"]
+    visual.sentence_id = data["sentence_id"]
+    visual.comment = data["comment"]
+    visual.params = data["params"]
+    # commit it to database
+    db.session.commit()
+    return create_response(
+        message=f"Successfully edited visualization {visual.name} with id: {visual.id}"
+    )
 
 # Delete
 @main.route("/visualization/delete", methods=["POST"])

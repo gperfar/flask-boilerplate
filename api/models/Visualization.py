@@ -39,19 +39,44 @@ class Visualization(Mixin, db.Model):
 
 class VisualizationLineChart(Visualization):
     __tablename__ = "visualizationlinechart"
-
     id = db.Column(db.Integer, db.ForeignKey("visualization.id", ondelete="CASCADE"), primary_key=True)
 
     __mapper_args__ = {
         'polymorphic_identity':'linechart',
     }
-
-
     def __init__(self, name:str, sentence_id:int, comment:str, params:json):
-        super().__init__(name=name,sentence_id= sentence_id,comment= comment, type = "linechart", params = params)
+        super().__init__(name=name,sentence_id= sentence_id,comment= comment, type = "Line chart", params = params)
 
     def __repr__(self):
         return f"<Line Chart {self.name}>"
+    
+    def pre_render(self):
+        sentence = Sentence.query.get(self.sentence_id)
+        results = sentence.execute()
+        return {
+            'type': self.type,
+            'column_data': self.params['columns'],
+            'xaxis_label': self.params['xaxis_label'],
+            'yaxis_label': self.params['yaxis_label'],
+            'yaxis2_label': self.params['yaxis2_label'] if 'yaxis2_label' in self.params else '',
+            'results':results
+            }
+
+
+
+
+    class VisualizationBarChart(Visualization):
+    __tablename__ = "visualizationbarchart"
+    id = db.Column(db.Integer, db.ForeignKey("visualization.id", ondelete="CASCADE"), primary_key=True)
+
+    __mapper_args__ = {
+        'polymorphic_identity':'barchart',
+    }
+    def __init__(self, name:str, sentence_id:int, comment:str, params:json):
+        super().__init__(name=name,sentence_id= sentence_id,comment= comment, type = "Bar chart", params = params)
+
+    def __repr__(self):
+        return f"<Bar Chart {self.name}>"
     
     def pre_render(self):
         sentence = Sentence.query.get(self.sentence_id)
