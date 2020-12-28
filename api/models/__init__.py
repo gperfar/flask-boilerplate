@@ -13,7 +13,7 @@ __all__ = [
     "User", 
     "Connection", "Postgres", 
     "Sentence", 
-    "Visualization", "VisualizationLineChart",
+    "Visualization", #"VisualizationLineChart",
     "Dashboard"
     ]
 

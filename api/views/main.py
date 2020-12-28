@@ -88,12 +88,12 @@ def init_data():
         logger.info(msg)
         return create_response(status=422, message=msg)
     # return user_id
-    #Users
-    dummyusers =[]
-    dummyusers.append(User(name="Aragorn", email="AragornStrider@gondor.com", password="KingOfGondor123"))
-    dummyusers.append(User(name="Gandalf", email="WhiteWizard@gondor.com", password="FlyYouFools!"))
-    db.session.add_all(dummyusers)
-    db.session.commit()
+    # #Users
+    # dummyusers =[]
+    # dummyusers.append(User(name="Aragorn", email="AragornStrider@gondor.com", password="KingOfGondor123"))
+    # dummyusers.append(User(name="Gandalf", email="WhiteWizard@gondor.com", password="FlyYouFools!"))
+    # db.session.add_all(dummyusers)
+    # db.session.commit()
     #Connections
     dummyconnections =[]
     postgres1 = Postgres(name="Aragorn's Connection 1", host="AragornStrider.gondor.com", database="Gondor", username = "userr", password = "password", port = 5432, comment = "",user_id = user_id)
@@ -106,8 +106,8 @@ def init_data():
     db.session.commit()
     #Sentences
     sentence1 = Sentence(name="Sentence 1", sql_query="SELECT * FROM people WHERE kingdom = 'Rohan'", connection_id = 1, comment = "Keeping tabs on the Rohirrim")
-    sentence2 = Sentence(name="Sentence 2", sql_query="SELECT * FROM Customers", connection_id = 3, comment = "Keeping tabs on Customers") 
-    sentence3 = Sentence(name="Sentence 3 - using GROUP", sql_query="SELECT city, COUNT(*) AS customers, (COUNT(*)*1.0/2)::float AS customershalf FROM Customers GROUP BY city", connection_id = 3, comment = "Customers we have in each city") 
+    sentence2 = Sentence(name="Sentence 2", sql_query="SELECT * FROM Customers", connection_id = 2, comment = "Keeping tabs on Customers") 
+    sentence3 = Sentence(name="Sentence 3 - using GROUP", sql_query="SELECT city, COUNT(*) AS customers, (COUNT(*)*1.0/2)::float AS customershalf FROM Customers GROUP BY city", connection_id = 2, comment = "Customers we have in each city") 
     db.session.add(sentence1)
     db.session.add(sentence2)
     db.session.add(sentence3)

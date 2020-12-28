@@ -15,10 +15,11 @@ class Visualization(Mixin, db.Model):
     type = db.Column(db.String, nullable=False)
     params = db.Column(db.JSON)
 
-    __mapper_args__ = {
-        'polymorphic_identity':'visualization',
-        'polymorphic_on':type
-    }
+    # __mapper_args__ = {
+    #     'polymorphic_identity':'visualization',
+    #     'polymorphic_on':type
+    # }
+    
     def __init__(self, name:str, sentence_id:int, comment:str, type:str, params:json):
         self.name = name
         self.sentence_id = sentence_id
