@@ -125,7 +125,7 @@ def init_data():
             'legend':True
         }
     )
-    visual2 = VisualizationLineChart(
+    visual2 = VisualizationBarChart(
         name="Bars, Bars, Bars!", 
         sentence_id = 3, 
         comment = "Based on the real Sentence on the real Connection", 
@@ -550,6 +550,12 @@ def create_visualization():
             params = data["params"])
     if data["type"] == "Bar chart":
         new_visualization = VisualizationBarChart(
+            name = data["name"], 
+            sentence_id = data["sentence_id"], 
+            comment = data["comment"],
+            params = data["params"])
+    if data["type"] == "Area chart":
+        new_visualization = VisualizationAreaChart(
             name = data["name"], 
             sentence_id = data["sentence_id"], 
             comment = data["comment"],
