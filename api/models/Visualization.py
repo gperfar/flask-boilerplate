@@ -36,7 +36,7 @@ class Visualization(Mixin, db.Model):
         return raw_dict
     
     def pre_render(self):
-        if self.type in ['Area chart', 'Bar chart', 'Line chart', 'Area/Bar/Line chart']:
+        if self.type in ["Area chart", "Bar chart", "Line chart", "Area/Bar/Line chart","Radar chart", "Pie chart", "Radial bar chart", "Scatter chart"]:
             sentence = Sentence.query.get(self.sentence_id)
             results = sentence.execute()
             return {
