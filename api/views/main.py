@@ -636,13 +636,17 @@ def pre_render_visualization():
         msg = "No ID provided for visualization."
         logger.info(msg)
         return create_response(status=422, message=msg)
-    # Fetch Sentence
-    visualization = db.session.query(Visualization).filter(Visualization.id == data["visualization_id"]).first()
-    # Commit it to database
-    results = visualization.pre_render()
-    # return results
-    return create_response(message=f"You were able to render the visualization!", data=results)
-    
+    try:
+        # Fetch Sentence
+        visualization = db.session.query(Visualization).filter(Visualization.id == data["visualization_id"]).first()
+        # Commit it to database
+        results = visualization.pre_render()
+        # return results
+        return create_response(message=f"You were able to render the visualization!", data=results)
+    except(Exception) as error:
+        create_response(status=500,message= error)
+
+
 ############ Dashboards ###############
 # Return
 @main.route("/dashboards", methods=["GET"])

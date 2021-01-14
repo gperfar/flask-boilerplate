@@ -37,16 +37,19 @@ class Visualization(Mixin, db.Model):
     
     def pre_render(self):
         if self.type in ["Area chart", "Bar chart", "Line chart", "Area/Bar/Line chart","Radar chart", "Pie chart", "Radial bar chart", "Scatter chart"]:
-            sentence = Sentence.query.get(self.sentence_id)
-            results = sentence.execute()
-            return {
-                'type': self.type,
-                'column_data': self.params['columns'],
-                'xaxis_label': self.params['xaxis_label'],
-                'yaxis_label': self.params['yaxis_label'],
-                'yaxis2_label': self.params['yaxis2_label'] if 'yaxis2_label' in self.params else '',
-                'results':results
-                }
+            try:
+                sentence = Sentence.query.get(self.sentence_id)
+                results = sentence.execute()
+                return {
+                    'type': self.type,
+                    'column_data': self.params['columns'],
+                    'xaxis_label': self.params['xaxis_label'] if 'xaxis_label' in self.params else '',
+                    'yaxis_label': self.params['yaxis_label'] if 'yaxis_label' in self.params else '',
+                    'yaxis2_label': self.params['yaxis2_label'] if 'yaxis2_label' in self.params else '',
+                    'results':results
+                    }
+            except(Exception) as error:
+                create_response(status=500,message= error)
         return "You shouldn't see this."
 
 
