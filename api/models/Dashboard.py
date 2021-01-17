@@ -16,6 +16,14 @@ class Dashboard(Mixin, db.Model):
     comment = db.Column(db.String, nullable=True)
     visualizations = db.relationship('Visualization', secondary=visualizations, lazy=True,backref=db.backref('dashboards', lazy=True))
 
+    def export(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "comment": self.comment,
+            "visualizations": serialize_list(self.visualizations)
+        }
+
     def __init__(self, name:str, comment:str):
         self.name = name
         self.comment = comment

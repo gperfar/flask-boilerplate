@@ -555,19 +555,6 @@ def create_visualization():
         params = data["params"],
         type = data["type"]
     )
-    # if data["type"] == "Bar chart":
-    #     new_visualization = VisualizationBarChart(
-    #         name = data["name"], 
-    #         sentence_id = data["sentence_id"], 
-    #         comment = data["comment"],
-    #         params = data["params"])
-    # if data["type"] == "Area chart":
-    #     new_visualization = VisualizationAreaChart(
-    #         name = data["name"], 
-    #         sentence_id = data["sentence_id"], 
-    #         comment = data["comment"],
-    #         params = data["params"])
-    # commit it to database
     db.session.add(new_visualization)
     db.session.commit()
     return create_response(
@@ -672,9 +659,19 @@ def return_dashboards():
         Dashboard.id == data["dashboard_id"],
         Connection.user_id == data["user_id"]
         ).first()
-    dashboard_details = dashboard.__dict__
-    dashboard_details.pop('_sa_instance_state', None)
-    return create_response(data={"dashboard": dashboard_details})
+    # dashboard_details = dashboard.__dict__
+    # return dashboard.export()
+    # dashboard_visuals = dashboard.visualizations
+    # visualizations_response = json.dumps(serialize_list(dashboard_visuals))
+    # return visualizations_response
+    # dashboard_details.pop('_sa_instance_state', None)
+    return create_response(data={
+        "dashboard": dashboard.export()#dashboard_details,
+        # "visualizations": [{"id": 1, "comment": "hola"},
+        #                     {"id": 2, "comment": "chau"}
+        # ]
+        #"visualizations": json.dumps(serialize_list(dashboard.visualizations))
+    })
 
 # Create
 @main.route("/dashboard/create", methods=["POST"])
@@ -691,6 +688,7 @@ def create_dashboard():
     new_dashboard = Dashboard(
         name = data["name"], 
         comment = data["comment"])
+        ## Missing: add/remove visuals from dashboard
     # commit it to database
     db.session.add(new_dashboard)
     db.session.commit()
