@@ -690,7 +690,10 @@ def create_dashboard():
         comment = data["comment"])
         ## Missing: add/remove visuals from dashboard
     # commit it to database
-    new_dashboard.visualizations = data["visualizations"]
+    visualizations = []
+    for vis in data["visualizations"]:
+        visualizations.append(Visualization.query.get(vis["_id"]))
+    new_dashboard.visualizations = visualizations
     db.session.add(new_dashboard)
     db.session.commit()
     return create_response(
@@ -717,7 +720,10 @@ def edit_dashboard():
     # Edit it
     dash.name = data["name"]
     dash.comment = data["comment"]
-    dash.visualizations = data["visualizations"]
+    visualizations =[]
+    for vis in data["visualizations"]:
+        visualizations.append(Visualization.query.get(vis["_id"]))
+    dash.visualizations = visualizations
     ## Missing: add/remove visuals from dashboard
     # commit it to database
     db.session.commit()
