@@ -1,5 +1,5 @@
 from flask import Blueprint, request
-from api.models import db, User, Sentence, Connection, Postgres, Visualization, Dashboard#, VisualizationLineChart
+from api.models import db, User, Sentence, Connection, Postgres, Visualization, Dashboard, DashboardsVisualizations#, VisualizationLineChart
 from api.core import create_response, serialize_list, logger
 from sqlalchemy import inspect, func
 import psycopg2, json
@@ -148,7 +148,8 @@ def init_data():
     # db.session.commit()
     #Dashboards
     dash1 = Dashboard(name="Dashboard 1", comment = "No comment - 1")
-    dash1.visualizations.append(visual1)
+    
+    dash1.visualizations.append(DashboardsVisualizations(visualization = visual1, order = 2))
     dash2 = Dashboard(name="Dashboard 2", comment = "Dashboard with no comment - 2")
     db.session.add(dash1)
     db.session.add(dash2)
@@ -651,11 +652,11 @@ def return_dashboards():
         logger.info(msg)
         return create_response(status=422, message=msg)
     if "dashboard_id" not in data:
-        dashboards = db.session.query(Dashboard).join(Visualization, Dashboard.visualizations).join(Sentence).join(Connection).filter(
+        dashboards = db.session.query(Dashboard).join(DashboardsVisualizations, Dashboard.visualizations).join(Visualization).join(Sentence).join(Connection).filter(
             Connection.user_id == data["user_id"]
             ).all()
         return create_response(data={"dashboards": serialize_list(dashboards)})
-    dashboard = db.session.query(Dashboard).join(Visualization, Dashboard.visualizations).join(Sentence).join(Connection).filter(
+    dashboard = db.session.query(Dashboard).join(DashboardsVisualizations, Dashboard.visualizations).join(Visualization).join(Sentence).join(Connection).filter(
         Dashboard.id == data["dashboard_id"],
         Connection.user_id == data["user_id"]
         ).first()
@@ -692,7 +693,12 @@ def create_dashboard():
     # commit it to database
     visualizations = []
     for vis in data["visualizations"]:
-        visualizations.append(Visualization.query.get(vis["_id"]))
+        dash_vis = DashboardsVisualizations(
+            visualization = Visualization.query.get(vis["_id"]),
+            order = vis["order"]
+            )
+        visualizations.append(dash_vis)
+
     new_dashboard.visualizations = visualizations
     db.session.add(new_dashboard)
     db.session.commit()
@@ -720,9 +726,12 @@ def edit_dashboard():
     # Edit it
     dash.name = data["name"]
     dash.comment = data["comment"]
-    visualizations =[]
     for vis in data["visualizations"]:
-        visualizations.append(Visualization.query.get(vis["_id"]))
+        dash_vis = DashboardsVisualizations(
+            visualization = Visualization.query.get(vis["_id"]),
+            order = vis["order"]
+            )
+        visualizations.append(dash_vis)
     dash.visualizations = visualizations
     ## Missing: add/remove visuals from dashboard
     # commit it to database

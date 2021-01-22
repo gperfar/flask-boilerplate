@@ -4,24 +4,40 @@ from api.core import create_response, serialize_list, logger
 from sqlalchemy import inspect
 import psycopg2, json
 
-visualizations = db.Table('visualizations',
-    db.Column('visualization_id', db.Integer, db.ForeignKey('visualization.id'), primary_key=True),
-    db.Column('dashboard_id', db.Integer, db.ForeignKey('dashboard.id'), primary_key=True)
-    )
+# visualizations = db.Table('visualizations',
+#     db.Column('visualization_id', db.Integer, db.ForeignKey('visualization.id'), primary_key=True),
+#     db.Column('dashboard_id', db.Integer, db.ForeignKey('dashboard.id'), primary_key=True)
+#     )
+
+class DashboardsVisualizations(Mixin, db.Model):
+    __tablename__ = 'dashboards_visualizations'
+    dashboard_id = db.Column(db.Integer, db.ForeignKey("dashboard.id", ondelete="CASCADE"), primary_key=True)
+    visualization_id = db.Column(db.Integer, db.ForeignKey("visualization.id", ondelete="CASCADE"), primary_key=True)
+    order = db.Column(db.Integer)
+    visualization = db.relationship("Visualization", back_populates="dashboards")
+    dashboard = db.relationship("Dashboard", back_populates="visualizations")
+
 
 class Dashboard(Mixin, db.Model):
     __tablename__ = "dashboard"
     id = db.Column(db.Integer, unique=True, primary_key=True)
     name = db.Column(db.String, nullable=False)
     comment = db.Column(db.String, nullable=True)
-    visualizations = db.relationship('Visualization', secondary=visualizations, lazy=True,backref=db.backref('dashboards', lazy=True))
+    #visualizations = db.relationship('Visualization', secondary=visualizations, lazy=True,backref=db.backref('dashboards', lazy=True))
+    visualizations = db.relationship("DashboardsVisualizations", back_populates="dashboard")
 
     def export(self):
+        dash_visuals=[]
+        for vis in self.visualizations:
+            temp_vis = vis.visualization
+            temp_vis.order = vis.order 
+            dash_visuals.append(temp_vis)
+        
         return {
             "id": self.id,
             "name": self.name,
             "comment": self.comment,
-            "visualizations": serialize_list(self.visualizations)
+            "dashboard_visualizations": serialize_list(dash_visuals)
         }
 
     def __init__(self, name:str, comment:str):

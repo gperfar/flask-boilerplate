@@ -5,7 +5,7 @@ from .Sentence import Sentence
 from .User import User
 from .Connection import Connection, Postgres
 from .Visualization import Visualization#, VisualizationLineChart
-from .Dashboard import Dashboard
+from .Dashboard import Dashboard, DashboardsVisualizations
 from .base import db
 
 __all__ = [
@@ -14,7 +14,7 @@ __all__ = [
     "Connection", "Postgres", 
     "Sentence", 
     "Visualization", #"VisualizationLineChart",
-    "Dashboard"
+    "Dashboard", "DashboardsVisualizations"
     ]
 
 # You must import all of the new Models you create to this page

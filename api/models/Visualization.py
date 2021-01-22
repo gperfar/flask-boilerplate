@@ -14,6 +14,7 @@ class Visualization(Mixin, db.Model):
     sentence_id = db.Column(db.Integer, db.ForeignKey("sentence.id", ondelete="CASCADE"), nullable=False)
     type = db.Column(db.String, nullable=False)
     params = db.Column(db.JSON)
+    dashboards = db.relationship("DashboardsVisualizations", back_populates="visualization")
 
     # __mapper_args__ = {
     #     'polymorphic_identity':'visualization',
