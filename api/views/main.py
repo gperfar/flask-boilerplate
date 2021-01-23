@@ -679,7 +679,6 @@ def create_dashboard():
     new_dash = Dashboard(
         name = data["name"], 
         comment = data["comment"])
-        ## Missing: add/remove visuals from dashboard
     # commit it to database
     new_dash.visualizations=[]
     for vis in data["visualizations"]:
@@ -691,7 +690,7 @@ def create_dashboard():
     db.session.add(new_dash)
     db.session.commit()
     return create_response(
-        message=f"Successfully created dashboard {new_dashboard.name} with id: {new_dashboard.id}"
+        message=f"Successfully created dashboard {new_dash.name} with id: {new_dash.id}"
     )
 
 # Edit
