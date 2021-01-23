@@ -27,10 +27,17 @@ class Visualization(Mixin, db.Model):
         return f"<Visualization {self.name}>"
 
     def get_fields(self):
-        raw_dict = self.__dict__
-        raw_dict.pop('_sa_instance_state', None) 
-        return raw_dict
-    
+        # raw_dict = self.__dict__
+        # raw_dict.pop('_sa_instance_state', None) 
+        # return raw_dict
+        return {
+            "name": self.name,
+            "comment": self.comment,
+            "sentence_id": self.sentence_id,
+            "type": self.type,
+            "params": self.params
+        }
+
     def pre_render(self):
         if self.type in ["Area chart", "Bar chart", "Line chart", "Area/Bar/Line chart","Radar chart", "Pie chart", "Radial bar chart", "Scatter chart"]:
             try:

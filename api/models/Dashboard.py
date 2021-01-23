@@ -28,12 +28,20 @@ class Dashboard(Mixin, db.Model):
     visualizations = db.relationship("DashboardsVisualizations", back_populates="dashboard")
 
     def export(self):
+        temp_vis=[]
+        for vis in self.visualizations:
+            temp = vis.visualization.get_fields()
+            temp['order'] = vis.order
+            temp_vis.append(
+                # "visualization": vis.visualization.get_fields(),"order": vis.order
+                temp
+            )
+        
         return {
             "id": self.id,
             "name": self.name,
             "comment": self.comment,
-            "dashboard_visualizations": serialize_list(self.visualizations)
-            # "dashboard_visualizations": json.dumps(dash_visuals)
+            "dashboard_visualizations": temp_vis
         }
 
     def __init__(self, name:str, comment:str):
