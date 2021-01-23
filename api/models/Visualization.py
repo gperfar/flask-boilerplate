@@ -31,6 +31,7 @@ class Visualization(Mixin, db.Model):
         # raw_dict.pop('_sa_instance_state', None) 
         # return raw_dict
         return {
+            "_id": self.id,
             "name": self.name,
             "comment": self.comment,
             "sentence_id": self.sentence_id,
