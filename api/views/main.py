@@ -654,24 +654,14 @@ def return_dashboards():
     if "dashboard_id" not in data:
         dashboards = db.session.query(Dashboard).join(DashboardsVisualizations, Dashboard.visualizations).join(Visualization).join(Sentence).join(Connection).filter(
             Connection.user_id == data["user_id"]
-            ).all()
+        ).all()
         return create_response(data={"dashboards": serialize_list(dashboards)})
     dashboard = db.session.query(Dashboard).join(DashboardsVisualizations, Dashboard.visualizations).join(Visualization).join(Sentence).join(Connection).filter(
         Dashboard.id == data["dashboard_id"],
         Connection.user_id == data["user_id"]
-        ).first()
-    # dashboard_details = dashboard.__dict__
-    # return dashboard.export()
-    # dashboard_visuals = dashboard.visualizations
-    # visualizations_response = json.dumps(serialize_list(dashboard_visuals))
-    # return visualizations_response
-    # dashboard_details.pop('_sa_instance_state', None)
+    ).first()
     return create_response(data={
-        "dashboard": dashboard.export()#dashboard_details,
-        # "visualizations": [{"id": 1, "comment": "hola"},
-        #                     {"id": 2, "comment": "chau"}
-        # ]
-        #"visualizations": json.dumps(serialize_list(dashboard.visualizations))
+        "dashboard": dashboard.export()
     })
 
 # Create
@@ -734,7 +724,8 @@ def edit_dashboard():
     # commit it to database
     db.session.commit()
     return create_response(
-        message=f"Successfully edited dashboard {dash.name} with id: {dash.id}"
+        message=f"Successfully edited dashboard {dash.name} with id: {dash.id}. ",
+        data= {"visualizations": serialize_list(dash.visualizations)}
     )
 
 # Delete
@@ -755,76 +746,90 @@ def delete_dashboard():
     )
 
 
-############ Dumpster ###############
-@main.route("/logintest", methods=["GET"])
-def login_test():
-    query_params = request.args
-    email = query_params.get('email')
-    password = query_params.get('password')
-    try:
-        user = db.session.query(User).filter(User.email == email).first()
-        successful_login = user.match_password(password = password)
-        if successful_login:
-            return create_response(message = "Welcome, you coding beast")
-        return create_response(message = "You shall not pass!")
-    except:
-        return create_response(message = "You shall not pass!")
 
-@main.route("/login", methods=["POST"])
-def login():
-    data = request.get_json()
-    if "email" not in data:
-        msg = "No email provided for login."
-        logger.info(msg)
-        return create_response(status=422, message=msg)
-    if "password" not in data:
-        msg = "No password provided for login."
-        logger.info(msg)
-        return create_response(status=422, message=msg)
-    query_params = request.args
-    email = data["email"]
-    password = data["password"]
-    try:
-        user = db.session.query(User).filter(func.lower(User.email) == email.lower()).first()
-        successful_login = user.match_password(password = password)
-        if successful_login:
-            # Identity can be any data that is json serializable
-            return create_response(message = str(user.id))
-        return create_response(status=400, message = "You shall not pass!")
-    except:
-        return create_response(status=400, message = "You shall not pass!")
 
-############ Users ###############
-# Return all
-@main.route("/users", methods=["GET"])
-def get_users():
-    users = User.query.all()
-    return create_response(data={"users": serialize_list(users)})
 
-# Create
-@main.route("/user/create", methods=["POST"])
-def create_person():
-    data = request.get_json()
 
-    logger.info("Data recieved: %s", data)
-    if "name" not in data:
-        msg = "No name provided for user."
-        logger.info(msg)
-        return create_response(status=422, message=msg)
-    if "email" not in data:
-        msg = "No email provided for user."
-        logger.info(msg)
-        return create_response(status=422, message=msg)
-    if "password" not in data:
-        msg = "No password provided for user."
-        logger.info(msg)
-        return create_response(status=422, message=msg)
-    # create SQLAlchemy Objects
-    new_user = User(name=data["name"], email = data["email"], password = data["password"])
 
-    # commit it to database
-    db.session.add(new_user)
-    db.session.commit()
-    return create_response(
-        message=f"Successfully created person {new_user.name} with id: {new_user.id}"
-    )
+
+
+
+
+
+
+
+
+
+# ############ Dumpster ###############
+# @main.route("/logintest", methods=["GET"])
+# def login_test():
+#     query_params = request.args
+#     email = query_params.get('email')
+#     password = query_params.get('password')
+#     try:
+#         user = db.session.query(User).filter(User.email == email).first()
+#         successful_login = user.match_password(password = password)
+#         if successful_login:
+#             return create_response(message = "Welcome, you coding beast")
+#         return create_response(message = "You shall not pass!")
+#     except:
+#         return create_response(message = "You shall not pass!")
+
+# @main.route("/login", methods=["POST"])
+# def login():
+#     data = request.get_json()
+#     if "email" not in data:
+#         msg = "No email provided for login."
+#         logger.info(msg)
+#         return create_response(status=422, message=msg)
+#     if "password" not in data:
+#         msg = "No password provided for login."
+#         logger.info(msg)
+#         return create_response(status=422, message=msg)
+#     query_params = request.args
+#     email = data["email"]
+#     password = data["password"]
+#     try:
+#         user = db.session.query(User).filter(func.lower(User.email) == email.lower()).first()
+#         successful_login = user.match_password(password = password)
+#         if successful_login:
+#             # Identity can be any data that is json serializable
+#             return create_response(message = str(user.id))
+#         return create_response(status=400, message = "You shall not pass!")
+#     except:
+#         return create_response(status=400, message = "You shall not pass!")
+
+# ############ Users ###############
+# # Return all
+# @main.route("/users", methods=["GET"])
+# def get_users():
+#     users = User.query.all()
+#     return create_response(data={"users": serialize_list(users)})
+
+# # Create
+# @main.route("/user/create", methods=["POST"])
+# def create_person():
+#     data = request.get_json()
+
+#     logger.info("Data recieved: %s", data)
+#     if "name" not in data:
+#         msg = "No name provided for user."
+#         logger.info(msg)
+#         return create_response(status=422, message=msg)
+#     if "email" not in data:
+#         msg = "No email provided for user."
+#         logger.info(msg)
+#         return create_response(status=422, message=msg)
+#     if "password" not in data:
+#         msg = "No password provided for user."
+#         logger.info(msg)
+#         return create_response(status=422, message=msg)
+#     # create SQLAlchemy Objects
+#     new_user = User(name=data["name"], email = data["email"], password = data["password"])
+
+#     # commit it to database
+#     db.session.add(new_user)
+#     db.session.commit()
+#     return create_response(
+#         message=f"Successfully created person {new_user.name} with id: {new_user.id}"
+#     )
