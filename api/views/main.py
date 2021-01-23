@@ -726,11 +726,12 @@ def edit_dashboard():
     # Edit it
     dash.name = data["name"]
     dash.comment = data["comment"]
+    visualizations=[]
     for vis in data["visualizations"]:
         dash_vis = DashboardsVisualizations(
             visualization = Visualization.query.get(vis["_id"]),
             order = vis["order"]
-            )
+        )
         visualizations.append(dash_vis)
     dash.visualizations = visualizations
     ## Missing: add/remove visuals from dashboard
