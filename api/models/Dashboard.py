@@ -11,8 +11,9 @@ import psycopg2, json
 
 class DashboardsVisualizations(Mixin, db.Model):
     __tablename__ = 'dashboards_visualizations'
-    dashboard_id = db.Column(db.Integer, db.ForeignKey("dashboard.id", ondelete="CASCADE"), primary_key=True)
-    visualization_id = db.Column(db.Integer, db.ForeignKey("visualization.id", ondelete="CASCADE"), primary_key=True)
+    id = db.Column(db.Integer, unique=True, primary_key=True)
+    dashboard_id = db.Column(db.Integer, db.ForeignKey("dashboard.id", ondelete="CASCADE"))
+    visualization_id = db.Column(db.Integer, db.ForeignKey("visualization.id", ondelete="CASCADE"))
     order = db.Column(db.Integer)
     visualization = db.relationship("Visualization", back_populates="dashboards")
     dashboard = db.relationship("Dashboard", back_populates="visualizations")

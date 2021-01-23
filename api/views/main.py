@@ -686,21 +686,19 @@ def create_dashboard():
     if "comment" not in data:
         data["comment"] = ""
     # create SQLAlchemy Object
-    new_dashboard = Dashboard(
+    new_dash = Dashboard(
         name = data["name"], 
         comment = data["comment"])
         ## Missing: add/remove visuals from dashboard
     # commit it to database
-    visualizations = []
+    new_dash.visualizations=[]
     for vis in data["visualizations"]:
         dash_vis = DashboardsVisualizations(
             visualization = Visualization.query.get(vis["_id"]),
             order = vis["order"]
-            )
-        visualizations.append(dash_vis)
-
-    new_dashboard.visualizations = visualizations
-    db.session.add(new_dashboard)
+        )
+        new_dash.visualizations.append(dash_vis)
+    db.session.add(new_dash)
     db.session.commit()
     return create_response(
         message=f"Successfully created dashboard {new_dashboard.name} with id: {new_dashboard.id}"
@@ -726,15 +724,13 @@ def edit_dashboard():
     # Edit it
     dash.name = data["name"]
     dash.comment = data["comment"]
-    visualizations=[]
+    dash.visualizations=[]
     for vis in data["visualizations"]:
         dash_vis = DashboardsVisualizations(
             visualization = Visualization.query.get(vis["_id"]),
             order = vis["order"]
         )
-        visualizations.append(dash_vis)
-    dash.visualizations = visualizations
-    ## Missing: add/remove visuals from dashboard
+        dash.visualizations.append(dash_vis)
     # commit it to database
     db.session.commit()
     return create_response(
@@ -757,9 +753,6 @@ def delete_dashboard():
     return create_response(
         message=f"Successfully deleted dashboard."
     )
-
-
-
 
 
 ############ Dumpster ###############
