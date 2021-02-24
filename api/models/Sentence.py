@@ -11,15 +11,17 @@ class Sentence(Mixin, db.Model):
     id = db.Column(db.Integer, unique=True, primary_key=True)
     name = db.Column(db.String, nullable=False)
     sql_query = db.Column(db.String, nullable=False)
+    visual_query_params = db.Column(db.JSON)
     connection_id = db.Column(db.Integer, db.ForeignKey("connection.id", ondelete="CASCADE"), nullable=False)
     comment = db.Column(db.String, nullable=True)
     visualizations = db.relationship('Visualization', backref='sentence', lazy=True, cascade="all, delete-orphan")
 
-    def __init__(self, name:str, sql_query:str, connection_id:int, comment:str):
+    def __init__(self, name:str, sql_query:str, connection_id:int, comment:str, visual_query_params:json):
         self.name = name
         self.sql_query = sql_query
         self.connection_id = connection_id
         self.comment = comment
+        self.visual_query_params = visual_query_params
 
     def __repr__(self):
         return f"<Sentence {self.name}>"
