@@ -105,9 +105,17 @@ def init_data():
     db.session.add_all(dummyconnections)
     db.session.commit()
     #Sentences
-    sentence1 = Sentence(name="Sentence 1", sql_query="SELECT * FROM people WHERE kingdom = 'Rohan'", connection_id = 1, comment = "Keeping tabs on the Rohirrim")
-    sentence2 = Sentence(name="Sentence 2", sql_query="SELECT * FROM Customers", connection_id = 2, comment = "Keeping tabs on Customers") 
-    sentence3 = Sentence(name="Sentence 3 - using GROUP", sql_query="SELECT city, COUNT(*) AS customers, (COUNT(*)*1.0/2)::float AS customershalf FROM Customers GROUP BY city", connection_id = 2, comment = "Customers we have in each city") 
+    sentence1 = Sentence(name="Sentence 1", sql_query="SELECT * FROM people WHERE kingdom = 'Rohan'", connection_id = 1, comment = "Keeping tabs on the Rohirrim", visual_query_params = {'selected_tables': ['a']})
+    sentence2 = Sentence(name="Sentence 2", sql_query="SELECT * FROM Customers", connection_id = 2, comment = "Keeping tabs on Customers", visual_query_params = {'selected_tables': ['a']}) 
+    sentence3 = Sentence(
+        name="Sentence 3 - using GROUP", 
+        sql_query="SELECT city, COUNT(*) AS customers, (COUNT(*)*1.0/2)::float AS customershalf FROM Customers GROUP BY city", 
+        connection_id = 2, 
+        comment = "Customers we have in each city",
+        visual_query_params = {
+            'selected_tables': ['a']
+        }
+    ) 
     db.session.add(sentence1)
     db.session.add(sentence2)
     db.session.add(sentence3)
