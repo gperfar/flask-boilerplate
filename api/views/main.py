@@ -753,6 +753,24 @@ def delete_dashboard():
         message=f"Successfully deleted dashboard."
     )
 
+# Prepare Render
+@main.route("/dashboard/pre_render", methods=["POST"])
+def pre_render_dashboard():
+    data = request.get_json()
+    logger.info("Data recieved: %s", data)
+    if "dashboard_id" not in data:
+        msg = "No ID provided for dashboard."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
+    try:
+        # Fetch Sentence
+        dashboard = db.session.query(Dashboard).filter(Dashboard.id == data["dashboard_id"]).first()
+        # Commit it to database
+        results = dashboard.pre_render_visuals()
+        # return results
+        return create_response(message=f"You were able to render the visualization!", data=results)
+    except(Exception) as error:
+        create_response(status=500,message= error)
 
 
 
