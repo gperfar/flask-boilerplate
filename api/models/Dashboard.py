@@ -45,11 +45,12 @@ class Dashboard(Mixin, db.Model):
         }
     
     def pre_render_visuals(self):
-        temp_visualizations_render_data=[]
+        temp_list = []
         for vis in self.visualizations:
             temp = vis.visualization.pre_render()
-            temp_visualizations_render_data.apend(temp)
-        return {"visualizations_render_data": temp_visualizations_render_data}
+            # return temp
+            temp_list.append(temp)
+        return {'rendered_visualization': temp_list}
 
     def __init__(self, name:str, comment:str):
         self.name = name

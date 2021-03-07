@@ -763,12 +763,13 @@ def pre_render_dashboard():
         logger.info(msg)
         return create_response(status=422, message=msg)
     try:
-        # Fetch Sentence
-        dashboard = db.session.query(Dashboard).filter(Dashboard.id == data["dashboard_id"]).first()
+        # Fetch Dashboard
+        dashboard = Dashboard.query.get(data["dashboard_id"])
         # Commit it to database
+        # return dashboard.name
         results = dashboard.pre_render_visuals()
         # return results
-        return create_response(message=f"You were able to render the visualization!", data=results)
+        return create_response(message=f"You were able to render the dashboard!", data=results)
     except(Exception) as error:
         create_response(status=500,message= error)
 

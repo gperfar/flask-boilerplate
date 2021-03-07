@@ -46,7 +46,7 @@ class Visualization(Mixin, db.Model):
                 results = sentence.execute()
                 return {
                     'type': self.type,
-                    'column_data': self.params['columns'],
+                    'column_data': self.params['columns'] if 'column_data' in self.params else '',
                     'xaxis_label': self.params['xaxis_label'] if 'xaxis_label' in self.params else '',
                     'yaxis_label': self.params['yaxis_label'] if 'yaxis_label' in self.params else '',
                     'yaxis2_label': self.params['yaxis2_label'] if 'yaxis2_label' in self.params else '',
