@@ -429,7 +429,7 @@ def return_sentences():
         return create_response(status=422, message=msg)
     if "sentence_id" not in data:
         sentences = db.session.query(Sentence).filter(
-            Sentence.id._in(
+            Sentence.id.in_(
                 db.session.query(Access.model_id).filter(Access.user_id == data["user_id"], Access.model=='sentence')
             ) 
         ).all()
@@ -437,7 +437,7 @@ def return_sentences():
         return create_response(data={"sentences": serialize_list(sentences)})
     sentence = db.session.query(Sentence).filter(
         Sentence.id == data["sentence_id"],
-        Sentence.id._in(db.session.query(Access.model_id).filter(Access.user_id == data["user_id"], Access.model=='sentence'))
+        Sentence.id.in_(db.session.query(Access.model_id).filter(Access.user_id == data["user_id"], Access.model=='sentence'))
     ).first()
     sentence_details = sentence.__dict__
     sentence_details.pop('_sa_instance_state', None)
