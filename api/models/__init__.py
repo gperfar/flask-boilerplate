@@ -3,6 +3,7 @@
 # to prevent circular dependencies
 from .Sentence import Sentence
 from .User import User
+from .Access import Access
 from .Connection import Connection, Postgres
 from .Visualization import Visualization#, VisualizationLineChart
 from .Dashboard import Dashboard, DashboardsVisualizations
@@ -14,7 +15,8 @@ __all__ = [
     "Connection", "Postgres", 
     "Sentence", 
     "Visualization", #"VisualizationLineChart",
-    "Dashboard", "DashboardsVisualizations"
+    "Dashboard", "DashboardsVisualizations",
+    "Access"
     ]
 
 # You must import all of the new Models you create to this page

@@ -1,5 +1,5 @@
 from flask import Blueprint, request
-from api.models import db, User, Sentence, Connection, Postgres, Visualization, Dashboard, DashboardsVisualizations#, VisualizationLineChart
+from api.models import db, User, Sentence, Connection, Postgres, Visualization, Dashboard, DashboardsVisualizations, Access#, VisualizationLineChart
 from api.core import create_response, serialize_list, logger
 from sqlalchemy import inspect, func
 import psycopg2, json
@@ -161,6 +161,19 @@ def init_data():
     dash2 = Dashboard(name="Dashboard 2", comment = "Dashboard with no comment - 2")
     db.session.add(dash1)
     db.session.add(dash2)
+    #Access
+    access_load = []
+    a1 = Access(user_id=user_id, model='connection', model_id=1, level='admin')
+    access_load.append(a1)
+    access_load.append(Access(user_id=user_id, model='connection', model_id=2, level='admin'))
+    access_load.append(Access(user_id=user_id, model='sentence', model_id=1, level='admin'))
+    access_load.append(Access(user_id=user_id, model='sentence', model_id=2, level='admin'))
+    access_load.append(Access(user_id=user_id, model='sentence', model_id=3, level='admin'))
+    access_load.append(Access(user_id=user_id, model='visualization', model_id=1, level='admin'))
+    access_load.append(Access(user_id=user_id, model='visualization', model_id=2, level='admin'))
+    access_load.append(Access(user_id=user_id, model='dashboard', model_id=1, level='admin'))
+    access_load.append(Access(user_id=user_id, model='dashboard', model_id=2, level='admin'))
+    db.session.add_all(access_load)
     db.session.commit()
     msg = "Data has been initialized :D"
     return create_response(status=200, message=msg)
@@ -191,15 +204,19 @@ def return_connections():
         msg = "No user ID provided for connection(s)."
         logger.info(msg)
         return create_response(status=422, message=msg)
-    if "connection_id" not in data: #We return all connections
+    if "connection_id" not in data: #We return all connections that user has access to
         connections = db.session.query(Connection).filter(
-            Connection.user_id == data["user_id"]
-            ).all()
+            Connection.id.in_(
+                db.session.query(Access.model_id).filter(Access.user_id == data["user_id"], Access.model=='connection').all()
+            )
+        ).all()
         return create_response(data={"connections": serialize_list(connections)})
     connection = db.session.query(Connection).filter(
         Connection.id == data["connection_id"],
-        Connection.user_id == data["user_id"]
-        ).first()
+        Connection.id.in_(
+            db.session.query(Access.model_id).filter(Access.user_id == data["user_id"], Access.model=='connection').all()
+        )
+    ).first()
     connection_details = connection.get_fields()
     connection_details.pop('_sa_instance_state', None)
     return create_response(data={"connection": connection_details})
@@ -256,6 +273,7 @@ def create_connection():
         new_postgres = Postgres(name=data["name"], host = data["host"], database = data["database"], username = data["username"], password = data["password"], user_id = data["user_id"], comment = data["comment"], port = data["port"])
     # commit it to database
     db.session.add(new_postgres)
+    db.session.add(Access(user_id = data["user_id"], model = 'connection', model_id = new_postgres.id, level = 'admin'))
     db.session.commit()
     return create_response(
         message=f"Successfully created connection {new_postgres.name} with id: {new_postgres.id}"
@@ -373,6 +391,10 @@ def delete_connection():
         return create_response(status=422, message=msg)
     # Fetch Connection and delete
     db.session.query(Connection).filter(Connection.id == data["connection_id"]).delete()
+    db.session.query(Access).filter(
+        Access.model == 'connection', 
+        Access.model_id == data["connection_id"]
+    ).delete()
     # Commit it to database
     db.session.commit()
     return create_response(
@@ -406,20 +428,21 @@ def return_sentences():
         logger.info(msg)
         return create_response(status=422, message=msg)
     if "sentence_id" not in data:
-        sentences = db.session.query(Sentence).join(Connection).filter(
-            Connection.user_id == data["user_id"]
-            ).all()
+        sentences = db.session.query(Sentence).filter(
+            Sentence.id._in(
+                db.session.query(Access.model_id).filter(Access.user_id == data["user_id"], Access.model=='sentence')
+            ) 
+        ).all()
         # return sentences 
         return create_response(data={"sentences": serialize_list(sentences)})
-    sentence = db.session.query(Sentence).join(Connection).filter(
+    sentence = db.session.query(Sentence).filter(
         Sentence.id == data["sentence_id"],
-        Connection.user_id == data["user_id"]
-        ).first()
+        Sentence.id._in(db.session.query(Access.model_id).filter(Access.user_id == data["user_id"], Access.model=='sentence'))
+    ).first()
     sentence_details = sentence.__dict__
     sentence_details.pop('_sa_instance_state', None)
     return create_response(data={"sentence": sentence_details})
     
-
 # Create
 @main.route("/sentence/create", methods=["POST"])
 def create_sentence():
@@ -437,12 +460,23 @@ def create_sentence():
         msg = "No connection ID provided for sentence."
         logger.info(msg)
         return create_response(status=422, message=msg)
+    if "user_id" not in data:
+        msg = "No user ID provided for sentence."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
     if "comment" not in data:
         data["comment"] = ""
     # create SQLAlchemy Object
-    new_sentence = Sentence(name = data["name"], sql_query=data["sql_query"], connection_id = data["connection_id"], comment = data["comment"], visual_query_params = data["visual_query_params"])
+    new_sentence = Sentence(
+        name = data["name"], 
+        sql_query=data["sql_query"], 
+        connection_id = data["connection_id"], 
+        comment = data["comment"], 
+        visual_query_params = data["visual_query_params"]
+    )
     # commit it to database
     db.session.add(new_sentence)
+    db.session.add(Access(user_id = data["user_id"], model = 'sentence', model_id = new_sentence.id, level = 'admin'))
     db.session.commit()
     return create_response(
         message=f"Successfully created sentence {new_sentence.name} with id: {new_sentence.id}"
@@ -496,6 +530,10 @@ def delete_sentence():
         return create_response(status=422, message=msg)
     # Fetch Sentence and delete
     db.session.query(Sentence).filter(Sentence.id == data["sentence_id"]).delete()
+    db.session.query(Access).filter(
+        Access.model == 'sentence', 
+        Access.model_id == data["sentence_id"]
+    ).delete()
     # Commit it to database
     db.session.commit()
     return create_response(
@@ -524,16 +562,20 @@ def return_visualizations():
         logger.info(msg)
         return create_response(status=422, message=msg)
     if "visualization_id" not in data:
-        visualizations = db.session.query(Visualization).join(Sentence).join(Connection).filter(
-            Connection.user_id == data["user_id"]
-            ).all()
+        visualizations = db.session.query(Visualization).filter(
+            Visualization.id.in_(
+                db.session.query(Access.model_id).filter(Access.user_id == data["user_id"], Access.model=='visualization').all()
+            )
+        ).all()
         # return visualizations 
         return create_response(data={"visualizations": serialize_list(visualizations)})
     # If there was a specific visualization requested, fetch it and return it
-    visualization = db.session.query(Visualization).join(Sentence).join(Connection).filter(
-        Visualization.id == data["visualization_id"],
-        Connection.user_id == data["user_id"]
-        ).first()
+    visualization = db.session.query(Visualization).filter(
+        Visualization.id == data["connection_id"],
+        Visualization.id.in_(
+            db.session.query(Access.model_id).filter(Access.user_id == data["user_id"], Access.model=='visualization').all()
+        )
+    ).first()
     visualization_details = visualization.get_fields()
     # visualization_details.pop('_sa_instance_state', None)
     return create_response(data={"visualization": visualization_details})
@@ -566,6 +608,7 @@ def create_visualization():
         type = data["type"]
     )
     db.session.add(new_visualization)
+    db.session.add(Access(user_id = data["user_id"], model = 'visualization', model_id = new_visualization.id, level = 'admin'))
     db.session.commit()
     return create_response(
         message=f"Successfully created visualization {new_visualization.name} with id: {new_visualization.id}"
@@ -618,6 +661,10 @@ def delete_visualization():
         return create_response(status=422, message=msg)
     # Fetch Sentence and delete
     db.session.query(Visualization).filter(Visualization.id == data["visualization_id"]).delete()
+    db.session.query(Access).filter(
+        Access.model == 'visualization', 
+        Access.model_id == data["visualization_id"]
+    ).delete()
     # Commit it to database
     db.session.commit()
     return create_response(
@@ -661,13 +708,18 @@ def return_dashboards():
         logger.info(msg)
         return create_response(status=422, message=msg)
     if "dashboard_id" not in data:
-        dashboards = db.session.query(Dashboard).join(DashboardsVisualizations, Dashboard.visualizations).join(Visualization).join(Sentence).join(Connection).filter(
-            Connection.user_id == data["user_id"]
+        dashboards = db.session.query(Dashboard).filter(
+            Dashboard.id.in_(
+                db.session.query(Access.model_id).filter(Access.user_id == data["user_id"], Access.model=='dashboard').all()
+            )
         ).all()
         return create_response(data={"dashboards": serialize_list(dashboards)})
-    dashboard = db.session.query(Dashboard).join(DashboardsVisualizations, Dashboard.visualizations).join(Visualization).join(Sentence).join(Connection).filter(
+    #If a specific dashboard ID was passed...
+    dashboard = db.session.query(Dashboard).filter(
         Dashboard.id == data["dashboard_id"],
-        Connection.user_id == data["user_id"]
+        Dashboard.id.in_(
+            db.session.query(Access.model_id).filter(Access.user_id == data["user_id"], Access.model=='dashboard').all()
+        )
     ).first()
     return create_response(data={
         "dashboard": dashboard.export()
@@ -697,6 +749,7 @@ def create_dashboard():
         )
         new_dash.visualizations.append(dash_vis)
     db.session.add(new_dash)
+    db.session.add(Access(user_id = data["user_id"], model = 'dashboard', model_id = new_dash.id, level = 'admin'))
     db.session.commit()
     return create_response(
         message=f"Successfully created dashboard {new_dash.name} with id: {new_dash.id}"
@@ -745,8 +798,12 @@ def delete_dashboard():
         msg = "No ID provided for dashboard."
         logger.info(msg)
         return create_response(status=422, message=msg)
-    # Fetch Sentence and delete
+    # Fetch Dashboard and delete
     db.session.query(Dashboard).filter(Dashboard.id == data["dashboard_id"]).delete()
+    db.session.query(Access).filter(
+        Access.model == 'dashboard', 
+        Access.model_id == data["dashboard_id"]
+    ).delete()
     # Commit it to database
     db.session.commit()
     return create_response(
@@ -765,7 +822,6 @@ def pre_render_dashboard():
     try:
         # Fetch Dashboard
         dashboard = Dashboard.query.get(data["dashboard_id"])
-        # Commit it to database
         # return dashboard.name
         results = dashboard.pre_render_visuals()
         # return results
@@ -774,6 +830,126 @@ def pre_render_dashboard():
         create_response(status=500,message= error)
 
 
+############ Accesses ###############
+# Return
+@main.route("/accesses", methods=["GET"])
+def get_accesses():
+    accesses = Access.query.all()
+    return create_response(data={"accesses": serialize_list(accesses)})
+
+# Return (with user ID)
+@main.route("/accesses", methods=["POST"])
+def return_accesses():
+    data = request.get_json()
+    logger.info("Data recieved: %s", data)
+    if "user_id" not in data:
+        msg = "No user ID provided for accesses."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
+    if "access_id" not in data:
+        accesses = db.session.query(Access).filter(
+            Access.user_id == data["user_id"]
+        ).all()
+        return create_response(data={"accesses": serialize_list(accesses)})
+    #If a specific acceess ID was passed...
+    access = db.session.query(Access).filter(
+        Access.id == data["access_id"],
+        Access.user_id == data["user_id"]
+    ).first()
+    access_details = access.__dict__
+    access_details.pop('_sa_instance_state', None)
+    return create_response(data={
+        "access": access_details
+    })
+
+# Create
+@main.route("/access/create", methods=["POST"])
+def create_access():
+    data = request.get_json()
+    logger.info("Data recieved: %s", data)
+    if "user_id" not in data:
+        msg = "No user ID provided for access."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
+    if "model" not in data:
+        msg = "No model provided for access."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
+    if "model_id" not in data:
+        msg = "No model ID provided for access."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
+    if "level" not in data:
+        msg = "No access level provided for access."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
+    # Create SQLAlchemy Object
+    new_access = Access(
+        user_id = data["user_id"], 
+        model = data["model"],
+        model_id = data["model_id"],
+        level = data["level"])
+    # Commit it to database
+    db.session.add(new_access)
+    db.session.commit()
+    return create_response(
+        message=f"Successfully created access with id: {new_access.id}"
+    )
+
+# Edit
+@main.route("/access/edit", methods=["POST"])
+def edit_access():
+    data = request.get_json()
+    logger.info("Data recieved: %s", data)
+    if "access_id" not in data:
+        msg = "No ID provided for access."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
+    if "user_id" not in data:
+        msg = "No user ID provided for access."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
+    if "model" not in data:
+        msg = "No model provided for access."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
+    if "model_id" not in data:
+        msg = "No model ID provided for access."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
+    if "level" not in data:
+        msg = "No access level provided for access."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
+    # Fetch access
+    access = Access.query.get(data["access_id"])
+    # Edit it
+    access.user_id = data["user_id"]
+    access.model = data["model"]
+    access.model_id = data["model_id"]
+    access.level = data["level"]
+    # commit it to database
+    db.session.commit()
+    return create_response(
+        message=f"Successfully edited access with id: {access.id}. ",
+    )
+
+# Delete
+@main.route("/access/delete", methods=["POST"])
+def delete_access():
+    data = request.get_json()
+    logger.info("Data recieved: %s", data)
+    if "access_id" not in data:
+        msg = "No ID provided for access."
+        logger.info(msg)
+        return create_response(status=422, message=msg)
+    # Fetch Access and delete
+    db.session.query(Access).filter(Dashboard.id == data["access_id"]).delete()
+    # Commit it to database
+    db.session.commit()
+    return create_response(
+        message=f"Successfully deleted access."
+    )
 
 
 
